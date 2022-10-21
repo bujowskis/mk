@@ -6,6 +6,8 @@
 
 - [Diversification Methods](https://drive.google.com/file/d/1XI1p5CiWTVcgzPiBgKKXUSb0-4IlgrNB/view)
 
+- [Convection Selection Explained](http://www.framsticks.com/files/common/TournamentBasedConvectionSelectionEvolutionary.pdf)
+
 
 In the convection selection schemes, individuals are first sorted according to
 their fitness. Then each subpopulation receives a subset of individuals that fall

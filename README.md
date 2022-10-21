@@ -22,7 +22,7 @@ individuals are sorted according to their fitness, they are divided into as many
 sets as there are subpopulations so that each subpopulation receives the same
 number of individuals.
 
-<img src="https://github.com/bujowskis/mk/blob/master/Convection%20Selection%20Scheme.jpg" width="500" height="300" />
+<img src="https://github.com/bujowskis/mk/blob/master/Convection%20Selection%20Scheme.jpg" width="500" height="250" />
 
 Fig. 1: An illustration of four compared selection schemes. The fitness of 20 individuals is shown as red circles, and 4 subpopulations are depicted as green
 boxes. (a) Standard evolutionary algorithm with a single population. (b) Random assignment of individuals to subpopulations. (c) Convection selection with

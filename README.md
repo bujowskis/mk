@@ -1,5 +1,11 @@
 # Convection Selection Młoda Kadra Project
 
+## Base of articles:
+
+- [Niching](https://drive.google.com/file/d/1XP7q9zo72OYlNCa-IFHaI9lHTtRJomYN/view)
+
+- [Diversification Methods](https://drive.google.com/file/d/1XI1p5CiWTVcgzPiBgKKXUSb0-4IlgrNB/view)
+
 
 In the convection selection schemes, individuals are first sorted according to
 their fitness. Then each subpopulation receives a subset of individuals that fall

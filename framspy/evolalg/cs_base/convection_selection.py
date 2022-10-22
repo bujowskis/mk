@@ -1,8 +1,96 @@
+from abc import ABC
+from typing import List
+import time
+
+from ..structures.individual import Individual
+from ..structures.population import PopulationStructures
+from ..base.experiment_abc import ExperimentABC
+
+
+# todo - import and use numpy arrays, refactor code
+
+# todo - remove after done with experiment_frams_islands.py
+# noinspection DuplicatedCode
+class ExperimentIsland(ExperimentABC, ABC):
+    # TODO - take these as arguments
+    number_of_populations = 5
+    popsize = 100
+    migration_interval = 10
+    populations: List[PopulationStructures] = []
+
+    def migrate_populations(self):
+        print("migration")
+        pool_of_all_individuals = []
+        for p in self.populations:
+            pool_of_all_individuals.extend(p.population)
+
+        # TODO - could override `Individual` compare core function
+        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.rawfitness)
+
+        for i in range(self.number_of_populations):
+            shift = i * self.popsize
+            self.populations[i].population = sorted_individuals[shift:shift + self.popsize]
+
+    def _initialize_evolution(self, initial_genotype):
+        self.current_generation = 0
+        self.time_elapsed = 0
+        self.stats = []  # stores the best individuals, one from each generation
+        initial_individual = Individual(self.evaluate)
+        initial_individual.setAndEvaluate(initial_genotype)
+        self.stats.append(initial_individual.rawfitness)
+        [self.populations.append(PopulationStructures(
+            evaluate=self.evaluate,
+            initial_individual=initial_individual,
+            archive_size=self.archive_size,  # TODO - resolve archive_size
+            popsize=self.popsize)
+        ) for _ in range(self.number_of_populations)]
+
+    def get_state(self):
+        return [self.time_elapsed, self.current_generation, self.populations, self.hof, self.stats]
+
+    def set_state(self, state):
+        # todo - resolve time_elapsed out of scope
+        self.time_elapsed, self.current_generation, self.populations, hof_, self.stats = state
+        for h in sorted(hof_, key=lambda x: x.rawfitness):
+            self.hof.add(h)  # sorting: ensure that we add from worst to best so all individuals are added to HOF
+
+    def evolve(self, hof_savefile, generations, initial_genotype, pmut, pxov, tournament_size):
+        file_name = self.get_state_filename(hof_savefile)
+        state = self.load_state(file_name)
+        if state is not None:  # loaded state from file
+            self.current_generation += 1  # saved generation has been completed, start with the next one
+            print(
+                "...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (
+                    len(self.populations[0].population), len(self.hof), len(self.stats),
+                    (len(self.populations[0].archive)),
+                    self.current_generation,
+                    generations)
+            )  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
+        else:
+            self._initialize_evolution(initial_genotype)
+        time0 = time.process_time()
+        for g in range(self.current_generation, generations):
+            for p in self.populations:
+                p.population = self.make_new_population(p.population, pmut, pxov, tournament_size)
+
+            if g % self.migration_interval == 0:
+                self.migrate_populations()
+
+            pool_of_all_individuals = []
+            [pool_of_all_individuals.extend(p.population) for p in self.populations]
+            self.update_stats(g, pool_of_all_individuals)
+            if hof_savefile is not None:
+                self.time_elapsed += time.process_time() - time0
+                self.save_state(file_name)
+
+        return self.current_population.population, self.stats
+
+
 """
 The main idea of the Convection Selection:
-- Slaves - evolutionary algorithms in their own
+- Subpopulations (Slaves) - evolutionary algorithms in their own
     - similar fitness values between individuals in one Slave
-- Master - migrate individuals between Slaves
+- (Super)population (Master) - migrate individuals between Subpopulations
     - (all) genotypes sorted according to fitness
 
 First method - equiWidth
@@ -39,3 +127,14 @@ Second method - equiNumber
 #       6.2. Move "too good" individuals up -> Slave1 state = [0.1, 0.15, None]; Slave2 state = state + [0.23]
 #       (6.3.) Inject new, random/some-other-way, into Slave1
 #   (gen += 1)
+
+"""
+CS
+
+class EA:
+    self.population
+    def step()
+
+    def getState()
+    def setState()
+"""

@@ -1,140 +1,123 @@
-from abc import ABC
-from typing import List
-import time
+# based on experiment_abc.py
 
+import pickle
+import os
+from abc import ABC, abstractmethod
+# from tkinter import W
+from ..base.random_sequence_index import RandomIndexSequence
 from ..structures.individual import Individual
-from ..structures.population import PopulationStructures
-from ..base.experiment_abc import ExperimentABC
+
+BAD_FITNESS = None
+STATS_SAVE_ONLY_BEST_FITNESS = True
 
 
-# todo - import and use numpy arrays, refactor code
+class ExperimentABC(ABC):
+    current_population = []
+    hof = []
+    stats = []
+    current_genneration = 0
 
-# todo - remove after done with experiment_frams_islands.py
-# noinspection DuplicatedCode
-class ExperimentIsland(ExperimentABC, ABC):
-    # TODO - take these as arguments
-    number_of_populations = 5
-    popsize = 100
-    migration_interval = 10
-    populations: List[PopulationStructures] = []
+    def select(self, individuals, tournament_size, random_index_sequence):
+        """
+        Tournament selection, returns the index of the best individual from those taking part in the tournament
+        """
+        best_index = None
+        for i in range(tournament_size):
+            rnd_index = random_index_sequence.getNext()
+            if best_index is None or individuals[rnd_index].fitness > best_index.fitness:
+                best_index = individuals[rnd_index]
+        return best_index
 
-    def migrate_populations(self):
-        print("migration")
-        pool_of_all_individuals = []
-        for p in self.populations:
-            pool_of_all_individuals.extend(p.population)
+    def addGenotypeIfValid(self, ind_list, genotype):
+            new_individual = Individual(self.evaluate)
+            new_individual.setAndEvaluate(genotype)
+            if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in evaluate()
+                ind_list.append(new_individual)
 
-        # TODO - could override `Individual` compare core function
-        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.rawfitness)
+    def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
+        """
+        'individuals' is the input population (a list of individuals).
+        Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
+        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones.
+        """
+        newpop = []
+        N = len(individuals)
+        expected_mut = int(N * prob_mut)
+        expected_xov = int(N * prob_xov)
+        assert expected_mut + expected_xov <= N, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
+        ris = RandomIndexSequence(N)
 
-        for i in range(self.number_of_populations):
-            shift = i * self.popsize
-            self.populations[i].population = sorted_individuals[shift:shift + self.popsize]
+        # adding valid mutants of selected individuals...
+        while len(newpop) < expected_mut:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            self.addGenotypeIfValid(newpop, self.mutate(ind.genotype))
 
-    def _initialize_evolution(self, initial_genotype):
-        self.current_generation = 0
-        self.time_elapsed = 0
-        self.stats = []  # stores the best individuals, one from each generation
-        initial_individual = Individual(self.evaluate)
-        initial_individual.setAndEvaluate(initial_genotype)
-        self.stats.append(initial_individual.rawfitness)
-        [self.populations.append(PopulationStructures(
-            evaluate=self.evaluate,
-            initial_individual=initial_individual,
-            archive_size=self.archive_size,  # TODO - resolve archive_size
-            popsize=self.popsize)
-        ) for _ in range(self.number_of_populations)]
+        # adding valid crossovers of selected individuals...
+        while len(newpop) < expected_mut + expected_xov:
+            ind1 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind2 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            self.addGenotypeIfValid(newpop, self.cross_over(ind1.genotype, ind2.genotype))
 
+        # select clones to fill up the new population until we reach the same size as the input population
+        while len(newpop) < len(individuals):
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            newpop.append(Individual(self.evaluate).copyFrom(ind))
+
+        return newpop
+
+    def save_state(self, state_filename):
+        state = self.get_state()
+        if state_filename is None:
+            return
+        state_filename_tmp = state_filename + ".tmp"
+        try:
+            with open(state_filename_tmp, "wb") as f:
+                pickle.dump(state, f)
+            os.replace(state_filename_tmp, state_filename)  # ensures the new file was first saved OK (e.g. enough free space on device), then replace
+        except Exception as ex:
+            raise RuntimeError("Failed to save evolution state '%s' (because: %s). This does not prevent the experiment from continuing, but let's stop here to fix the problem with saving state files." % (state_filename_tmp, ex))
+
+    def load_state(self, state_filename):
+        if state_filename is None:
+            print("File name not provided")
+            return None
+        try:
+            with open(state_filename, 'rb') as f:
+                state = pickle.load(f)
+                self.set_state(state)
+        except FileNotFoundError:
+            return None
+        print("...Loaded evolution state from '%s'" % state_filename)
+        return True
+
+    def get_state_filename(self, save_file_name):
+        return None if save_file_name is None else save_file_name + '_state.pkl'
+    
     def get_state(self):
-        return [self.time_elapsed, self.current_generation, self.populations, self.hof, self.stats]
+        return [self.current_genneration,self.current_population,self.stats]
 
-    def set_state(self, state):
-        # todo - resolve time_elapsed out of scope
-        self.time_elapsed, self.current_generation, self.populations, hof_, self.stats = state
-        for h in sorted(hof_, key=lambda x: x.rawfitness):
-            self.hof.add(h)  # sorting: ensure that we add from worst to best so all individuals are added to HOF
+    def set_state(self,state):
+        self.current_genneration,self.current_population,self.stats = state
 
-    def evolve(self, hof_savefile, generations, initial_genotype, pmut, pxov, tournament_size):
-        file_name = self.get_state_filename(hof_savefile)
-        state = self.load_state(file_name)
-        if state is not None:  # loaded state from file
-            self.current_generation += 1  # saved generation has been completed, start with the next one
-            print(
-                "...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (
-                    len(self.populations[0].population), len(self.hof), len(self.stats),
-                    (len(self.populations[0].archive)),
-                    self.current_generation,
-                    generations)
-            )  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
-        else:
-            self._initialize_evolution(initial_genotype)
-        time0 = time.process_time()
-        for g in range(self.current_generation, generations):
-            for p in self.populations:
-                p.population = self.make_new_population(p.population, pmut, pxov, tournament_size)
+    def update_stats(self, generation, all_individuals):
+        worst = min(all_individuals, key=lambda item: item.rawfitness)
+        best = max(all_individuals, key=lambda item: item.rawfitness)
+        self.hof.add(best)  # instead of single best, could add all individuals in population here, but then the outcome would depend on the order of adding
+        self.stats.append(best.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else best)
+        print("%d\t%d\t%g\t%g" % (generation, len(all_individuals), worst.rawfitness, best.rawfitness))
 
-            if g % self.migration_interval == 0:
-                self.migrate_populations()
+    @abstractmethod
+    def mutate(self, gen1):
+        pass
 
-            pool_of_all_individuals = []
-            [pool_of_all_individuals.extend(p.population) for p in self.populations]
-            self.update_stats(g, pool_of_all_individuals)
-            if hof_savefile is not None:
-                self.time_elapsed += time.process_time() - time0
-                self.save_state(file_name)
+    @abstractmethod
+    def cross_over(self, gen1, gen2):
+        pass
 
-        return self.current_population.population, self.stats
+    @abstractmethod
+    def evaluate(self, genotype):
+        pass
 
-
-"""
-The main idea of the Convection Selection:
-- Subpopulations (Slaves) - evolutionary algorithms in their own
-    - similar fitness values between individuals in one Slave
-- (Super)population (Master) - migrate individuals between Subpopulations
-    - (all) genotypes sorted according to fitness
-
-First method - equiWidth
-- divide the fitness range equally between Slaves
-- supposed the fitness range is [0, 1], 5 Slaves,
-    - Slave1 = [0.0, 0.2]
-    - Slave2 = (0.2, 0.4]
-    - (...)
-    - Slave5 = (0.8, 1.0]
-- it may happen some Slave's population is empty
-- worst-case scenario - it's the same as running a single evolutionary algorithm with no distribution
-
-Second method - equiNumber
-- divide the individuals equally between slaves
-- supposed the population [i0, i1, (...), i9] is sorted according to fitness (worst-best)
-    - Slave1 population = [i0, i1]
-    - Slave2 population = [i2, i3]
-    - (...)
-    - Slave5 population = [i8, i9]
-- the individuals are always spread equally between
-- more complex
-"""
-
-# Initially:
-# Slave1 state = [0.05, 0.08, 0.12]
-# (...)
-
-#   1. Slave1Step [0.0, 0.2] -> state = [0.1, 0.15, 0.23]
-#   2. Slave2Step (0.2, 0.4]
-#   (...)
-#   5. Slave5Step (0.8, 1.0]
-#   6. Master
-#       6.1. Check Slave1 state = [0.1, 0.15, **0.23**]
-#       6.2. Move "too good" individuals up -> Slave1 state = [0.1, 0.15, None]; Slave2 state = state + [0.23]
-#       (6.3.) Inject new, random/some-other-way, into Slave1
-#   (gen += 1)
-
-"""
-CS
-
-class EA:
-    self.population
-    def step()
-
-    def getState()
-    def setState()
-"""
+    @abstractmethod
+    def evolve(self):
+        pass

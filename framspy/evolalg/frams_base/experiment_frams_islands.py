@@ -1,8 +1,8 @@
-
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
 from ..frams_base.experiment_frams import ExperimentFrams
 from ..base.experiment_island_model_abc import Experiment_Island
+
 
 class ExperimentFramsIslands(Experiment_Island, ExperimentFrams):
     def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, constraints, genformat, number_of_populations, migration_interval, archive_size=0) -> None:
@@ -18,9 +18,10 @@ class ExperimentFramsIslands(Experiment_Island, ExperimentFrams):
         initial_individual = Individual(self.evaluate)
         initial_individual.setAndEvaluate(self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype))
         self.stats.append(initial_individual.rawfitness)
-        [self.populations.append(PopulationStructures(evaluate=self.evaluate,
-                                                      initial_individual=initial_individual,
-                                                      archive_size=self.archive_size,
-                                                      popsize=self.popsize))
-        for _ in range(self.number_of_populations)]
+        [self.populations.append(PopulationStructures(
+            evaluate=self.evaluate,
+            initial_individual=initial_individual,
+            archive_size=self.archive_size,
+            popsize=self.popsize)
+        ) for _ in range(self.number_of_populations)]
         

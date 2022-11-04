@@ -2,24 +2,23 @@ import pickle
 import os
 from abc import ABC, abstractmethod
 from tkinter import W
-
 from ..base.random_sequence_index import RandomIndexSequence
 from ..structures.individual import Individual
-
 
 BAD_FITNESS = None
 STATS_SAVE_ONLY_BEST_FITNESS = True
 
+
 class ExperimentABC(ABC):
-        
     current_population = []
     hof = []
     stats = []
     current_genneration = 0
 
-
     def select(self, individuals, tournament_size, random_index_sequence):
-        """Tournament selection, returns the index of the best individual from those taking part in the tournament"""
+        """
+        Tournament selection, returns the index of the best individual from those taking part in the tournament
+        """
         best_index = None
         for i in range(tournament_size):
             rnd_index = random_index_sequence.getNext()
@@ -34,17 +33,17 @@ class ExperimentABC(ABC):
                 ind_list.append(new_individual)
 
     def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
-        """'individuals' is the input population (a list of individuals).
+        """
+        'individuals' is the input population (a list of individuals).
         Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
-        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""
-
+        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones.
+        """
         newpop = []
         N = len(individuals)
         expected_mut = int(N * prob_mut)
         expected_xov = int(N * prob_xov)
         assert expected_mut + expected_xov <= N, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
         ris = RandomIndexSequence(N)
-
 
         # adding valid mutants of selected individuals...
         while len(newpop) < expected_mut:
@@ -120,5 +119,3 @@ class ExperimentABC(ABC):
     @abstractmethod
     def evolve(self):
         pass
-
-

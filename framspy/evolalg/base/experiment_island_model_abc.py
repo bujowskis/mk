@@ -8,7 +8,6 @@ from .experiment_abc import ExperimentABC
 
 
 class Experiment_Island(ExperimentABC, ABC):
-    
     number_of_populations = 5
     popsize = 100
     populations: List[PopulationStructures] = []
@@ -25,7 +24,6 @@ class Experiment_Island(ExperimentABC, ABC):
         for i in range(self.number_of_populations):
             shift = i*self.popsize
             self.populations[i].population = sorted_individuals[shift:shift+self.popsize]
-
 
     def _initialize_evolution(self, initialgenotype):
         self.current_genneration = 0

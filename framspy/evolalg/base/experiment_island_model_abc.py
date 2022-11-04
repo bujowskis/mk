@@ -11,7 +11,7 @@ class Experiment_Island(ExperimentABC, ABC):
     
     number_of_populations = 5
     popsize = 100
-    populations: List[PopulationStructures] =[]
+    populations: List[PopulationStructures] = []
     migration_interval = 10
 
     def migrate_populations(self):
@@ -48,7 +48,7 @@ class Experiment_Island(ExperimentABC, ABC):
         for h in sorted(hof_, key=lambda x: x.rawfitness):  # sorting: ensure that we add from worst to best so all individuals are added to HOF
             self.hof.add(h)
 
-    def evolve(self,hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
+    def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
         file_name = self.get_state_filename(hof_savefile)
         state = self.load_state(file_name)
         if state is not None:  # loaded state from file

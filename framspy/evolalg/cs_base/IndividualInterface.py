@@ -1,5 +1,39 @@
 # from ..FramsticksLib.FramsticksLib import FramsticksLib
 
+from __future__ import annotations
+
+
+class IndividualInterface:
+    genotype = None
+    fitness = None
+
+    def evaluate(self):
+        pass
+
+    def crossover(self, other: IndividualInterface):
+        pass
+
+    def mutate(self):
+        pass
+
+    def set_genotype(self, genotype):
+        self.genotype = genotype
+        # evaluate?
+        pass
+
+    def __str__(self):
+        pass
+
+    def __gt__(self, other):
+        ...
+
+    def __lt__(self, other):
+        ...
+
+    def __eq__(self, other):
+        ...
+
+
 class Individual:
     def __init__(self, evaluate):
         self.genotype: str = ""

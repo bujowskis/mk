@@ -1,5 +1,8 @@
 # Convection Selection Młoda Kadra Project
 
+## How stuff works
+- [gdoc](https://docs.google.com/document/d/1LAyeRrTTnjC1XVllBG8wzMZP7a-6MYHS5lWjI2oFwi0/edit?usp=sharing)
+
 ## Base of articles:
 
 - [Niching](https://drive.google.com/file/d/1XP7q9zo72OYlNCa-IFHaI9lHTtRJomYN/view)

@@ -4,8 +4,8 @@ from abc import ABC
 from typing import List
 import time
 
-from ..structures.individual import Individual
-from ..structures.population import PopulationStructures
+from framspy.evolalg.structures.individual import Individual
+from framspy.evolalg.structures.population import PopulationStructures
 from .cs_abc import ConvectionSelectionABC
 
 

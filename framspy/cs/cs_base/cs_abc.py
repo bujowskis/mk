@@ -4,8 +4,8 @@ import pickle
 import os
 from abc import ABC, abstractmethod
 # from tkinter import W
-from ..base.random_sequence_index import RandomIndexSequence
-from ..structures.individual import Individual
+from framspy.evolalg.base.random_sequence_index import RandomIndexSequence
+from framspy.evolalg.structures.individual import Individual
 
 # FIXME - take these as args?
 BAD_FITNESS = None

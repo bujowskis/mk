@@ -1,7 +1,8 @@
 class Individual:
     def __init__(self, evaluate):
-        self.genotype: str = ""
+        self.genotype: str = ""  # not necessarily...
         self.rawfitness: float = None  # used for stats. This is raw fitness value, None = not evaluated or invalid genotype
+        # float below may be misleading; set in case of multicriteria opt problems (not part of project though)
         self.fitness: float = None  # used in selection and can be modified e.g. by diversity or niching techniques
         self.evaluate = evaluate
     

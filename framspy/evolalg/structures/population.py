@@ -1,13 +1,12 @@
 import numpy as np
 import random
 
-from .individual import Individual
 from ..base.remove_diagonal import remove_diagonal
 
 class PopulationStructures:
-    def __init__(self, evaluate, initial_individual, archive_size=0, popsize=100) -> None:
+    def __init__(self,  initial_individual, archive_size=0, popsize=100) -> None:
         self.population_size = popsize
-        self.population = [Individual(evaluate).copyFrom(initial_individual) for i in range(self.population_size)]
+        self.population = [initial_individual.copy() for _ in range(self.population_size)]
         self.archive = []
         self.archive_size = archive_size
 

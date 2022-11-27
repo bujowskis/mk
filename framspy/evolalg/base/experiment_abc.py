@@ -2,23 +2,25 @@ import pickle
 import os
 from abc import ABC, abstractmethod
 from tkinter import W
+import time
+
 from ..base.random_sequence_index import RandomIndexSequence
 from ..structures.individual import Individual
+
 
 BAD_FITNESS = None
 STATS_SAVE_ONLY_BEST_FITNESS = True
 
-
 class ExperimentABC(ABC):
+        
     current_population = []
     hof = []
     stats = []
-    current_genneration = 0
+    current_generation = 0
+
 
     def select(self, individuals, tournament_size, random_index_sequence):
-        """
-        Tournament selection, returns the index of the best individual from those taking part in the tournament
-        """
+        """Tournament selection, returns the index of the best individual from those taking part in the tournament"""
         best_index = None
         for i in range(tournament_size):
             rnd_index = random_index_sequence.getNext()
@@ -27,23 +29,23 @@ class ExperimentABC(ABC):
         return best_index
 
     def addGenotypeIfValid(self, ind_list, genotype):
-            new_individual = Individual(self.evaluate)
-            new_individual.setAndEvaluate(genotype)
+            new_individual = Individual()
+            new_individual.setAndEvaluate(genotype, self.evaluate)
             if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in evaluate()
                 ind_list.append(new_individual)
 
     def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
-        """
-        'individuals' is the input population (a list of individuals).
+        """'individuals' is the input population (a list of individuals).
         Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
-        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones.
-        """
+        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""
+
         newpop = []
         N = len(individuals)
         expected_mut = int(N * prob_mut)
         expected_xov = int(N * prob_xov)
         assert expected_mut + expected_xov <= N, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
         ris = RandomIndexSequence(N)
+
 
         # adding valid mutants of selected individuals...
         while len(newpop) < expected_mut:
@@ -59,7 +61,7 @@ class ExperimentABC(ABC):
         # select clones to fill up the new population until we reach the same size as the input population
         while len(newpop) < len(individuals):
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
-            newpop.append(Individual(self.evaluate).copyFrom(ind))
+            newpop.append(Individual().copyFrom(ind))
 
         return newpop
 
@@ -92,10 +94,10 @@ class ExperimentABC(ABC):
         return None if save_file_name is None else save_file_name + '_state.pkl'
     
     def get_state(self):
-        return [self.current_genneration,self.current_population,self.stats]
+        return [self.current_generation,self.current_population,self.stats]
 
     def set_state(self,state):
-        self.current_genneration,self.current_population,self.stats = state
+        self.current_generation,self.current_population,self.stats = state
 
     def update_stats(self, generation, all_individuals):
         worst = min(all_individuals, key=lambda item: item.rawfitness)
@@ -103,6 +105,25 @@ class ExperimentABC(ABC):
         self.hof.add(best)  # instead of single best, could add all individuals in population here, but then the outcome would depend on the order of adding
         self.stats.append(best.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else best)
         print("%d\t%d\t%g\t%g" % (generation, len(all_individuals), worst.rawfitness, best.rawfitness))
+    
+    def evolve(self,hof_savefile,generations, initialgenotype, pmut, pxov, tournament_size):
+        file_name = self.get_state_filename(hof_savefile)
+        state = self.load_state(file_name)
+        if state is not None:  # loaded state from file
+            self.current_generation += 1  # saved generation has been completed, start with the next one
+            print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
+
+        else:
+            self._initialize_evolution(initialgenotype)
+        time0 = time.process_time()
+        for g in range(self.current_generation, generations):
+            self.current_population.population = self.make_new_population(self.current_population.population, pmut, pxov, tournament_size)
+            self.update_stats(g,self.current_population.population)
+            if hof_savefile is not None:
+                self.timeelapsed += time.process_time() - time0
+                self.save_state(file_name) 
+
+        return self.current_population.population, self.stats
 
     @abstractmethod
     def mutate(self, gen1):
@@ -116,6 +137,3 @@ class ExperimentABC(ABC):
     def evaluate(self, genotype):
         pass
 
-    @abstractmethod
-    def evolve(self):
-        pass

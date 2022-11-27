@@ -1,5 +1,13 @@
 # Convection Selection Młoda Kadra Project
 
+## Setup - Windows
+### Environment Variables
+- set `FRAMS_PATH` to the directory containing framsticks program distribution, e.g.
+```commandline
+setx FRAMS_PATH "C:\Users\ADMIN\Downloads\Framsticks50rc23"
+```
+- set `DIR_WITH_FRAMS_LIBRARY` to the 
+
 ## How stuff works
 - [gdoc](https://docs.google.com/document/d/1LAyeRrTTnjC1XVllBG8wzMZP7a-6MYHS5lWjI2oFwi0/edit?usp=sharing)
 

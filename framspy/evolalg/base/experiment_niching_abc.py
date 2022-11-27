@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from tkinter import W
 import numpy as np
+import time
 
 from deap import base
 from deap import tools
@@ -88,8 +89,8 @@ class ExperimentNiching(ExperimentABC, ABC):
         offspring = tools.selTournamentDCD(population,N)
         
         def addGenotypeIfValid(ind_list, genotype):
-            new_individual = Individual(self.evaluate)
-            new_individual.setAndEvaluate(genotype)
+            new_individual = Individual()
+            new_individual.setAndEvaluate(genotype, self.evaluate)
             if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in frams_evaluate()
                 ind_list.append(new_individual)
         
@@ -119,7 +120,7 @@ class ExperimentNiching(ExperimentABC, ABC):
         # select clones to fill up the new population until we reach the same size as the input population
         while len(newpop) < len(population):
             ind,counter = get_indyvidual(offspring,counter)
-            newpop.append(Individual(self.evaluate).copyFrom(ind))
+            newpop.append(Individual().copyFrom(ind))
         
         pop_offspring = population+newpop
         print(len(pop_offspring))
@@ -129,6 +130,34 @@ class ExperimentNiching(ExperimentABC, ABC):
             self.do_nsga2_dissim(pop_offspring)
         out_pop = tools.selNSGA2(pop_offspring,len(population))
         return out_pop
+
+    def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
+        file_name = self.get_state_filename(hof_savefile)
+        state = self.load_state(file_name)
+        if state is not None:  # loaded state from file
+            self.current_generation += 1  # saved generation has been completed, start with the next one
+            print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
+        else:
+            self._initialize_evolution(self.genformat,initialgenotype)
+
+        time0 = time.process_time()
+        for g in range(self.current_generation, generations):
+            if self.fit != "raw" and self.fit !="nsga2" and self.fit !="nslc":
+                self.do_niching(self.current_population)
+
+            if type(self.current_population.population[0].fitness) == DeapFitness:
+                self.current_population.population = self.make_new_population_nsga2(self.current_population.population, pmut, pxov)
+            else:
+                self.current_population.population = self.make_new_population(self.current_population.population, pmut, pxov, tournament_size)
+
+            self.update_stats(g, self.current_population.population)
+            
+            if hof_savefile is not None:
+                self.current_generation=g
+                self.timeelapsed += time.process_time() - time0
+                self.save_state(file_name) 
+
+        return self.current_population.population, self.stats
 
     @abstractmethod
     def dissimilarity(self, population: list):

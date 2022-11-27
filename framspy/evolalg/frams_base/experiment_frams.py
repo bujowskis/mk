@@ -1,5 +1,3 @@
-import time
-
 from ..base.experiment_abc import ExperimentABC, STATS_SAVE_ONLY_BEST_FITNESS
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
@@ -59,10 +57,10 @@ class ExperimentFrams(ExperimentABC):
         return fitness
 
     def get_state(self):
-        return [self.timeelapsed, self.current_genneration,self.current_population,self.hof,self.stats]
-
+        return [self.timeelapsed, self.current_generation,self.current_population,self.hof,self.stats]
+    
     def set_state(self,state):
-        self.timeelapsed, self.current_genneration,self.current_population,hof_,self.stats = state
+        self.timeelapsed, self.current_generation,self.current_population,hof_,self.stats = state
         for h in sorted(hof_, key=lambda x: x.rawfitness):  # sorting: ensure that we add from worst to best so all individuals are added to HOF
             self.hof.add(h)
 
@@ -73,31 +71,11 @@ class ExperimentFrams(ExperimentABC):
         return self.frams_lib.crossOver(gen1, gen2)
 
     def _initialize_evolution(self, initialgenotype):
-        self.current_genneration = 0
+        self.current_generation = 0
         self.timeelapsed = 0
         self.stats = []  # stores the best individuals, one from each generation
-        initial_individual = Individual(self.evaluate)
-        initial_individual.setAndEvaluate(self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype))
+        initial_individual = Individual()
+        initial_individual.setAndEvaluate(self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype), self.evaluate)
         self.hof.add(initial_individual)
         self.stats.append(initial_individual.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else initial_individual)
-        self.current_population = PopulationStructures(self.evaluate, initial_individual=initial_individual, archive_size=0, popsize=self.popsize)
-
-
-    def evolve(self,hof_savefile,generations, initialgenotype, pmut, pxov, tournament_size):
-        file_name = self.get_state_filename(hof_savefile)
-        state = self.load_state(file_name)
-        if state is not None:  # loaded state from file
-            self.current_genneration += 1  # saved generation has been completed, start with the next one
-            print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_genneration, generations))  # self.current_genneration (and g) are 0-based, parsed_args.generations is 1-based
-
-        else:
-            self._initialize_evolution(initialgenotype)
-        time0 = time.process_time()
-        for g in range(self.current_genneration, generations):
-            self.current_population.population = self.make_new_population(self.current_population.population, pmut, pxov, tournament_size)
-            self.update_stats(g,self.current_population.population)
-            if hof_savefile is not None:
-                self.timeelapsed += time.process_time() - time0
-                self.save_state(file_name) 
-
-        return self.current_population.population, self.stats
+        self.current_population = PopulationStructures(initial_individual=initial_individual, archive_size=0, popsize=self.popsize)

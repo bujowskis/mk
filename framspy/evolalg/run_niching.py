@@ -2,8 +2,8 @@ import argparse
 import sys
 
 from FramsticksLib import FramsticksLib
-from framspy.evolalg.utils.utils import ensureDir
-from frams_base.experiment_frams_niching import ExperimentFramsNiching
+from .utils import ensureDir
+from .frams_base.experiment_frams_niching import ExperimentFramsNiching
 
     
 

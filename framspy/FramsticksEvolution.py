@@ -3,7 +3,9 @@ import os
 import sys
 import numpy as np
 from deap import creator, base, tools, algorithms
-from framspy.evolalg.FramsticksLib.FramsticksLib import FramsticksLib
+from FramsticksLib import FramsticksLib
+import matplotlib.pyplot as plt
+import csv
 
 
 # Note: this may be less efficient than running the evolution directly in Framsticks, so if performance is key, compare both options.

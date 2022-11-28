@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from tkinter import W
 import time
 
+# TODO - resolve namespace package
 from ..base.random_sequence_index import RandomIndexSequence
 from ..structures.individual import Individual
 
@@ -11,13 +12,15 @@ from ..structures.individual import Individual
 BAD_FITNESS = None
 STATS_SAVE_ONLY_BEST_FITNESS = True
 
+
 class ExperimentABC(ABC):
-        
+    """
+    TODO - documentation
+    """
     current_population = []
     hof = []
     stats = []
     current_generation = 0
-
 
     def select(self, individuals, tournament_size, random_index_sequence):
         """Tournament selection, returns the index of the best individual from those taking part in the tournament"""
@@ -29,16 +32,19 @@ class ExperimentABC(ABC):
         return best_index
 
     def addGenotypeIfValid(self, ind_list, genotype):
-            new_individual = Individual()
-            new_individual.setAndEvaluate(genotype, self.evaluate)
-            if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in evaluate()
-                ind_list.append(new_individual)
+        new_individual = Individual()
+        new_individual.setAndEvaluate(genotype, self.evaluate)
+        # FIXME - should be BAD_FITNESS macro
+        #   - also, should let people know to define BAD_FITNESS that way in evaluate()
+        if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in evaluate()
+            ind_list.append(new_individual)
 
     def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
-        """'individuals' is the input population (a list of individuals).
+        """
+        'individuals' is the input population (a list of individuals).
         Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
-        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""
-
+        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones.
+        """
         newpop = []
         N = len(individuals)
         expected_mut = int(N * prob_mut)
@@ -46,7 +52,8 @@ class ExperimentABC(ABC):
         assert expected_mut + expected_xov <= N, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
         ris = RandomIndexSequence(N)
 
-
+        # NOTE - while len(newpop) < ... and the above assertion ensure output population has the same size
+        # TODO - what about elitism? it seems the elite is not preserved
         # adding valid mutants of selected individuals...
         while len(newpop) < expected_mut:
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
@@ -106,15 +113,18 @@ class ExperimentABC(ABC):
         self.stats.append(best.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else best)
         print("%d\t%d\t%g\t%g" % (generation, len(all_individuals), worst.rawfitness, best.rawfitness))
     
-    def evolve(self,hof_savefile,generations, initialgenotype, pmut, pxov, tournament_size):
+    def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
+        """
+        evolves for a given number of generations
+        """
+        # load previously saved evolution state
         file_name = self.get_state_filename(hof_savefile)
         state = self.load_state(file_name)
         if state is not None:  # loaded state from file
             self.current_generation += 1  # saved generation has been completed, start with the next one
             print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
-
         else:
-            self._initialize_evolution(initialgenotype)
+            self._initialize_evolution(initialgenotype)  # FIXME - what happens here? not present in abc or @abstractmethod
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
             self.current_population.population = self.make_new_population(self.current_population.population, pmut, pxov, tournament_size)
@@ -135,5 +145,8 @@ class ExperimentABC(ABC):
 
     @abstractmethod
     def evaluate(self, genotype):
+        """
+        # FIXME - this (connected w. addGenotypeIfValid)
+        Assumptions: define BAD_FITNESS as None
+        """
         pass
-

@@ -5,6 +5,11 @@
 - 
 
 ## Setup - Windows
+### Structure / workspace
+- scripts work if they go directly into framspy folder
+- `todo` - what if I want to use framspy anywhere else, create scripts outside framspy dir?
+  - (basically, that's how it's done when using all kinds of modules, packages)
+
 ### Environment Variables
 ```commandline
 setx FRAMS_PATH "C:\Users\ADMIN\PycharmProjects\mk\framspy"
@@ -13,7 +18,7 @@ setx FRAMS_PATH "C:\Users\ADMIN\PycharmProjects\mk\framspy"
 setx DIR_WITH_FRAMS_LIBRARY "C:\Users\ADMIN\PycharmProjects\mk\framspy"
 ```
 ```commandline
-setx FRAMSTICKS_DIR "C:\Program Files\Framsticks50rc23"
+setx FRAMSTICKS_DIR "C:\Users\ADMIN\Downloads\Framsticks50rc23"
 ```
 
 ## How stuff works

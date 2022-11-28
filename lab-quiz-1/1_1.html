@@ -1,0 +1,39 @@
+<html>
+
+
+<p dir="ltr" style="text-align: left;font-size:120%">In this exercise, we will prepare the Framsticks environment and the python evolution interface to work.</p>
+<ul>
+    <li>Download the Framsticks simulator – the most recent zip <a href="http://www.framsticks.com/apps-devel">from here</a> and uncompress it in some directory. Note the directory where the <strong>frams-objects.dll/.so</strong> library is – the python scripts will need it.<br></li>
+    <li>Download "framspy" (python interface to Framsticks) which is <a href="https://www.framsticks.com/svn/framsticks/framspy/">this entire directory</a>. It is best to download it using the svn client (<code>svn checkout</code>) or the git client (<code>git svn clone</code>); the https certificate only encrypts but does not confirm the website's identity, so you may encounter warnings.<br></li>
+    <li>Verify the cooperation of the python code and the simulator – make sure that this works without errors: <code>python frams-test.py &lt;path-to-frams-objects-library&gt;</code>.</li>
+    <li>Install the <a href="https://github.com/deap/deap">DEAP</a> framework in python.</li>
+    <li>Copy all <code>*.sim</code> files from the downloaded "framspy" repository/zip to the <code>data/</code> directory in the uncompressed Framsticks distribution.<br></li>
+    <li>Edit <code>run-deap-examples.cmd</code> and update the <code>DIR_WITH_FRAMS_LIBRARY</code> path, run this script and ensure that evolution works. Converting this script for Linux is trivial.<br></li>
+</ul>
+<p style="font-size:120%;margin-top:1em">We will now build the first simple structure and simulate it.<br></p>
+<ul>
+    <li>Run <code>Framsticks.exe</code> (under linux and macos you can use <a href="https://pl.wikipedia.org/wiki/Wine">wine</a>)</li>
+    <li>Press the "New" button on the left in the middle window, and in the "Genotype" field type <code>/*9*/LUR</code></li>
+    <li>The leading "comment" <code>/*9*/</code> means that we are using the genetic representation denoted by the symbol 9; this encoding is shortly denoted as <strong>f9</strong> ("f" as in "genetic <b>f</b>ormat")<br></li>
+    <li>You can use six letters (<strong>L</strong>eft, <strong>R</strong>ight, <strong>D</strong>own, <strong>U</strong><strong></strong>p, <strong>B</strong>ack, <strong>F</strong>orth) to draw a path in 3D with an imaginary "turtle"</li>
+    <li>When you move the cursor over the genotype or select genotype sections, you will see them highlighted in the 3D structure</li>
+    <li>By clicking on a 3D structure you can select its parts (you can extend the selection with SHIFT pressed) and the corresponding genes will be underlined</li>
+    <li>Build an interesting shape, then click "OK" at the bottom of the window (the genotype should appear in the genotype list)</li>
+</ul>
+<p style="font-size:120%;margin-top:1em">Simulation of the built structure.<br></p>
+<ul>
+    <li>At the top left you can see the "Groups" window. Double-click "Creatures" and uncheck (disable) the "Death" checkbox. Thanks to this, when the energy of the simulated structure drops below zero, it will not be automatically removed from the simulation.<br></li>
+    <li>Select a genotype in the genotype list, click the "Simulate" button in the same window, and in the small population selection menu select "Creatures".<br></li>
+    <li>In the top toolbar you can see three red buttons like in the music player. The first button stops the simulation, the second one performs a single simulation step, and the third one turns on the simulation permanently.</li>
+    <li>Turn on the simulation. You can adjust the simulation rate in the upper right corner of the "Artificial world" window that shows the simulated world.</li>
+    <li>Selecting the simulated structure in the bottom "populations" window will cause the camera to zoom in on it.</li>
+    <li>When the simulation is running, clicking on the structure with the left mouse button while holding down the CTRL key allows you to grab the structure with a "robot hand" and move it manually.<br></li>
+</ul>
+<p style="font-size:120%;margin-top:1em">Exercise:<br></p>
+<ul>
+    <li>Build a cube in <strong>f9</strong> using the lowest number of letters and paste its genotype as the solution below.<br></li>
+</ul>
+<p dir="ltr" style="text-align: left;"><br></p>
+
+
+</html>

@@ -1,12 +1,20 @@
 # Convection Selection Młoda Kadra Project
 
+## NOTES TO SELF
+- when using PyCharm, opening `framspy` 
+- 
+
 ## Setup - Windows
 ### Environment Variables
-- set `FRAMS_PATH` to the directory containing framsticks program distribution, e.g.
 ```commandline
-setx FRAMS_PATH "C:\Users\ADMIN\Downloads\Framsticks50rc23"
+setx FRAMS_PATH "C:\Users\ADMIN\PycharmProjects\mk\framspy"
 ```
-- set `DIR_WITH_FRAMS_LIBRARY` to the 
+```commandline
+setx DIR_WITH_FRAMS_LIBRARY "C:\Users\ADMIN\PycharmProjects\mk\framspy"
+```
+```commandline
+setx FRAMSTICKS_DIR "C:\Program Files\Framsticks50rc23"
+```
 
 ## How stuff works
 - [gdoc](https://docs.google.com/document/d/1LAyeRrTTnjC1XVllBG8wzMZP7a-6MYHS5lWjI2oFwi0/edit?usp=sharing)

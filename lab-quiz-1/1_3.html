@@ -1,0 +1,40 @@
+<html>
+
+<p dir="ltr" style="text-align: left;">We will now prepare the infrastructure for further experiments in the lab class. In the file <code>run-deap-examples.cmd</code> you have examples of various calls that launch evolutionary optimization performed by the DEAP framework. DEAP is one of the more popular frameworks for evolutionary algorithms in python. If you have any doubts about how it specifically implements evolutionary optimization, you can take a look at the <a href="https://deap.readthedocs.io/en/master/">documentation</a>.</p>
+
+<p dir="ltr" style="text-align: left;">The functions in the <code>FramsticksEvolution.py</code> source demonstrate how to connect an entirely independent optimization problem to the DEAP architecture. See how mutation, crossover, initial population generation and evaluation of an individual are plugged in. Then run a quick test run of the evolution (before you run it, read the description of the parameters below):</p>
+<p dir="ltr" style="text-align: left;margin-left:2em;"><code>python FramsticksEvolution.py -path %DIR_WITH_FRAMS_LIBRARY%&nbsp; -sim eval-allcriteria.sim;deterministic.sim;sample-period-2.sim&nbsp; -opt vertpos -max_numparts 30 -max_numgenochars 50 -initialgenotype /*9*/BLU&nbsp;&nbsp; -popsize 50&nbsp;&nbsp;&nbsp;
+        -generations 20 -hof_size 1</code></p>
+<p dir="ltr" style="text-align: left;">The meaning of the parameters used:</p>
+<ul>
+    <li><code>-sim eval-allcriteria.sim;deterministic.sim;sample-period-2.sim</code> – this argument is used to successively read settings from files with the extension <code>.sim</code>. These files must be copied to the subdirectory <code>data/</code> in the
+        Framsticks distribution. The structure of all data files used by Framsticks is simple: they consist of objects separated by a blank line (view a few <code>.sim</code> files in a text editor). Each object is defined by its name (first line), which is followed by a set of lines <code>parameter_name:value</code>.<br>We could set parameter values directly in the python source, but using this argument allows us to keep the source unchanged for now, and handle everything with command-line arguments.<br></li>
+    <li><code>-opt vertpos</code> – we choose the optimization criterion: "vertpos". After evaluating a genotype (the <code>frams_evaluate()</code> function), The Framsticks environment will return a dictionary with the values of various criteria (such as the number of elements of the structure being evaluated, its velocity of movement, the number of simulation steps). "vertpos" corresponds to the vertical coordinate of the center of gravity of the evaluated structure – and this is what we are going to maximize.<br></li>
+    <li><code>-max_numparts 30</code> – structures exceeding 30 elements ("Parts") will get fitness=–1, so the selection mechanism will likely not select them.<br></li>
+    <li><code>-max_numgenochars 50</code> – analogous to the above, we discourage evolution from exceeding genotype lengths of 50.<br></li>
+    <li><code>-initialgenotype /*9*/BLU</code> – we start our evolution with a simple structure that already has a center of gravity slightly above the ground.<br></li>
+    <li><code>-popsize 50</code> – quick tests now, so small population<br></li>
+    <li><code>-generations 20</code> – quick tests now, so few generations</li>
+    <li><code>-hof_size 1</code> – the size of the "Hall of Fame": during evolution, we keep track of one best individual (but in DEAP, elitism does not work by default)</li>
+    <li>answering this question write what fraction of individuals will be mutated and what fraction will be crossed over.<br></li>
+</ul>
+
+<p>After successfully running the command, you will see a simple statistic of the evolutionary process, and at the end you should see something similar to</p>
+
+<p style="margin-left:2em;"><code>Best individuals:<br>(0.8257831463424196,)&nbsp;&nbsp; --&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*9*/DDFBRFLUUU</code></p>
+<ul>
+</ul>
+<p dir="ltr" style="text-align: left;">Now let's say we want to run the evolution 10 times and save the genotype from the Hall of Fame to a separate file each time (you can then view the evolved structures in the Framsticks GUI by opening these files). We modify the command – we prepare a loop in our favorite shell, e.g. on Windows it can be:</p>
+<p dir="ltr" style="text-align: left;margin-left:2em;"><code><strong>for /L %%N in (1,1,10) do (</strong><br>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; python ....same-arguments-as-before.... <strong>-hof_savefile HoF-f9-%%N.gen</strong><br><strong>)</strong></code></p>
+
+<p dir="ltr" style="text-align: left;">The main task remains – to test different mutation intensity values. Since we don't want to modify the source in python for now, instead we will achieve our goal using the shell and command-line parameters. We need to create a few files with settings, for example a file called <code>f9-mut-0.sim</code> will contain only two lines<br></p>
+
+<p dir="ltr" style="text-align: left;margin-left:2em;"><code>sim_params:<br>f9_mut:0.0</code></p>
+<p dir="ltr" style="text-align: left;">The next file will be called <code>f9-mut-005</code>, and this file will set f9_mut to value 0.05 (meaning that 5% of genes will be mutated), and analogously for 10%, 20%, ..., 50% (remember to put the .sim files in the <code>data/</code> directory).<br></p>
+
+<p dir="ltr" style="text-align: left;">Then in the shell script we add the top-level loop, e.g. under Windows:</p>
+<p dir="ltr" style="text-align: left;margin-left:2em;"><code><strong>for %%M in (0,005,010,020,other-intermediate-values,050) do (</strong><br>&nbsp;&nbsp; &nbsp;for /L %%N in (1,1,10) do (<br>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; python -sim eval-allcriteria.sim;deterministic.sim;sample-period-2.sim<strong>;f9-mut-%%M.sim</strong>&nbsp; ....same-as-before.... <strong>-hof_savefile HoF-f9-%%M-%%N.gen</strong><br>&nbsp;&nbsp; &nbsp;)<strong>)</strong></code></p>
+
+<p dir="ltr" style="text-align: left;">and this will do the trick of testing different mutation intensities and repeating the evolutionary run 10 times for each intensity. We still have to prepare charts that will allow for convenient presentation of results and drawing conclusions.</p>
+
+</html>

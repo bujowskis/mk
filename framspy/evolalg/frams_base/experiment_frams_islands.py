@@ -21,7 +21,7 @@ class ExperimentFramsIslands(Experiment_Island, ExperimentFrams):
         initial_individual.setAndEvaluate(
             self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype), self.evaluate)
         self.stats.append(initial_individual.rawfitness)
-        [  # todo - vectorized "for"?
+        [  # todo - vectorized "for"? (equivalent of for loop) - ADAM
             self.populations.append(
                 PopulationStructures(
                     initial_individual=initial_individual,

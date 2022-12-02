@@ -6,6 +6,8 @@ from FramsticksLib import FramsticksLib
 from ..utils import ensureDir
 from ..frams_base.experiment_frams_niching import ExperimentFramsNiching
 
+# FIXME - make into smaller tests to run - this is RESEARCH
+
 SETTINGS_TO_TEST = {
     'opt': ['velocity', 'vertpos'],
     'max_numparts': [None],

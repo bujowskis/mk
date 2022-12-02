@@ -9,7 +9,7 @@ from ..base.random_sequence_index import RandomIndexSequence
 from ..structures.individual import Individual
 
 
-BAD_FITNESS = None
+BAD_FITNESS = None  # TODO - document, more self-explanartory
 STATS_SAVE_ONLY_BEST_FITNESS = True
 
 
@@ -17,12 +17,16 @@ class ExperimentABC(ABC):
     """
     FIXME - documentation (here and functions)
     """
-    current_population = []
+    current_population = []  # empty list todo - current_population_structure(s)
     hof = []
-    stats = []  # TODO - shouldn't be directly bound with current population? (not rely on list index)? (misaligned index, dynamic programming, unnecessarily complicate?)
+    stats = []  # (history of population size - min, max, avg, sd, etc. - tradeoff small file vs as much info)
     current_generation = 0
+    # todo - BAD_FITNESS
 
-    # FIXME - abstractmethod? (supply various selection methods - tournament, convection, random, roulette, etc.)
+    # CS == hyper-selection method, accept selection methods
+    # FIXME - abstractmethod? (supply various selection methods - tournament, random, roulette, etc.)
+    #   YES - abstract method, supply as method (modular)
+    # abstract, but default (this may be the way of providing default method for "abstract" select)
     def select(self, individuals, tournament_size, random_index_sequence):
         """Tournament selection, returns the index of the best individual from those taking part in the tournament"""
         best_index = None
@@ -35,12 +39,15 @@ class ExperimentABC(ABC):
     def addGenotypeIfValid(self, ind_list, genotype):
         new_individual = Individual()
         new_individual.setAndEvaluate(genotype, self.evaluate)
-        # FIXME - should be BAD_FITNESS macro
-        #   - also, should let people know to define BAD_FITNESS that way in evaluate()
-        if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in evaluate()
+        if new_individual.fitness is not BAD_FITNESS:  # this is how we defined BAD_FITNESS in evaluate()
             ind_list.append(new_individual)
 
+    def init(self):
+        super()
+        self.make_new_population = evolalg.make_populations.method1
+
     # FIXME - abstractmethod? (supply various schemes of creating new pops - mutate-crossover-clones, elitism, etc.)
+    # abstract, but default (this may be the way of providing default method for "abstract" select) -> the same way as select
     def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
         """
         'individuals' is the input population (a list of individuals).
@@ -55,7 +62,6 @@ class ExperimentABC(ABC):
         ris = RandomIndexSequence(N)
 
         # NOTE - while len(newpop) < ... and the above assertion ensure output population has the same size
-        # TODO - what about elitism? it seems the elite is not preserved
         # adding valid mutants of selected individuals...
         while len(newpop) < expected_mut:
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
@@ -99,7 +105,8 @@ class ExperimentABC(ABC):
         print("...Loaded evolution state from '%s'" % state_filename)
         return True
 
-    # FIXME - make static?
+    # note - make static?
+    # (should be static, not a big deal tho)
     def get_state_filename(self, save_file_name):
         return None if save_file_name is None else save_file_name + '_state.pkl'
     
@@ -121,6 +128,8 @@ class ExperimentABC(ABC):
         evolves for a given number of generations
         """
         # FIXME - loading is shared across experiments and should be moved into separate function
+        #   - YES, ABSOLUTELY
+
         # load previously saved evolution state
         file_name = self.get_state_filename(hof_savefile)
         state = self.load_state(file_name)
@@ -129,6 +138,7 @@ class ExperimentABC(ABC):
             print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
         else:
             self._initialize_evolution(initialgenotype)  # FIXME - what happens here? not present in abc or @abstractmethod
+            # (alredy fixed, just wait)
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):

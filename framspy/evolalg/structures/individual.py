@@ -1,13 +1,13 @@
 class Individual:
-    only_positive_fitness = True  # TODO - accept as param?
-    # TODO - can't we do the below instead of __init__ with warning?
-    # rawfitness: float
-    # fitness: float
+    only_positive_fitness = True  # TODO - accept as param? (unelegant, moved into cmd param)
+    """
+    (mention fitness may be float or dict of float fitnesses / vector)
+    """
 
     def __init__(self):
         self.genotype = None
-        self.rawfitness: float = None  # used for stats. This is raw fitness value, None = not evaluated or invalid genotype
-        self.fitness: float = None  # used in selection and can be modified e.g. by diversity or niching techniques
+        self.rawfitness = None  # used for stats. This is raw fitness value, None = not evaluated or invalid genotype
+        self.fitness = None  # used in selection and can be modified e.g. by diversity or niching techniques
 
     def copyFrom(self, individual):  # "copying constructor"
         self.genotype = individual.genotype
@@ -32,7 +32,7 @@ class Individual:
                     fitness = 0
         self.fitness = self.rawfitness = fitness
 
-    # TODO - other methods (lt, eq, etc.)?
+    # TODO - other methods (lt, eq, etc.)? (though sufficient)
     def __str__(self):
         try:
             return "%g\t%g\t'%s'" % (self.rawfitness, self.fitness, self.genotype)

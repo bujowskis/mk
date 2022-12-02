@@ -14,7 +14,8 @@ class Experiment_Island(ExperimentABC, ABC):
     number_of_populations: int = 5
     popsize: int = 100
     populations: List[PopulationStructures] = []
-    migration_interval = 10  # TODO - int OR method of migration? (fixed number of generations, event-driven, etc.)
+    # todo - (keep the below int OR if easy, go for "good migration moment" method - more modular, less refactoring)
+    migration_interval = 10
 
     def migrate_populations(self):
         pool_of_all_individuals = []
@@ -65,7 +66,7 @@ class Experiment_Island(ExperimentABC, ABC):
             if g % self.migration_interval == 0:
                 self.migrate_populations()
 
-            # TODO - for sure could be optimized, instead of
+            # TODO - for sure could be optimized (maybe)
             pool_of_all_individuals = []
             [pool_of_all_individuals.extend(p.population) for p in self.populations]
             self.update_stats(g, pool_of_all_individuals)

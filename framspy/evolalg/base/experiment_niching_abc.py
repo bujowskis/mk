@@ -13,7 +13,7 @@ from .experiment_abc import ExperimentABC
 from .remove_diagonal import remove_diagonal
 
 
-BAD_FITNESS = None  # todo - another definition?
+BAD_FITNESS = None  # todo - another definition? MAY REMOVE?
 STATS_SAVE_ONLY_BEST_FITNESS = True
 
 
@@ -79,7 +79,7 @@ class ExperimentNiching(ExperimentABC, ABC):
             i.fitness = DeapFitness(tuple((d,i.rawfitness)))
 
     def do_nslc_dissim(self, population):
-        # TODO - Novelty Search with Local Competition?
+        # - Novelty Search with Local Competition?
         dissim_matrix = self.dissimilarity(population)
         normalized_matrix = self.normalize_dissim(dissim_matrix)
         for i in range(len(normalized_matrix)):

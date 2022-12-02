@@ -25,7 +25,7 @@ class ExperimentFrams(ExperimentABC):
             return self.frams_lib.getSimplest(genetic_format)
 
     def genotype_within_constraint(self, genotype, dict_criteria_values, criterion_name, constraint_value):
-        REPORT_CONSTRAINT_VIOLATIONS = False  # FIXME - accept as param?
+        REPORT_CONSTRAINT_VIOLATIONS = False  # (for readability)
         if constraint_value is not None:
             actual_value = dict_criteria_values[criterion_name]
             if actual_value > constraint_value:
@@ -44,7 +44,10 @@ class ExperimentFrams(ExperimentABC):
         return valid
 
     def evaluate(self, genotype):
-        # TODO - documentation - evaluate_genotype (individual)?
+        """
+        TODO - documentation - evaluate_genotype (individual)?
+            (either single genotype OR DEAP artifact)
+        """
         data = self.frams_lib.evaluate([genotype])
         # print("Evaluated '%s'" % genotype, 'evaluation is:', data)
         valid = True
@@ -61,7 +64,7 @@ class ExperimentFrams(ExperimentABC):
             valid = self.check_valid_constraints(genotype,default_evaluation_data)
         if not valid:
             fitness = BAD_FITNESS
-        return fitness  # fixme
+        return fitness  # fixme (easy)
 
     def get_state(self):
         return [self.timeelapsed, self.current_generation,self.current_population,self.hof,self.stats]

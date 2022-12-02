@@ -2,6 +2,7 @@ import numpy as np
 
 
 # FIXME - name order
+#   (RSI) - talk with Adam
 class RandomIndexSequence:
     """
     A helper function for tournament selection.

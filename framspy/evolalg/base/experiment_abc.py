@@ -15,13 +15,14 @@ STATS_SAVE_ONLY_BEST_FITNESS = True
 
 class ExperimentABC(ABC):
     """
-    TODO - documentation (here and functions)
+    FIXME - documentation (here and functions)
     """
     current_population = []
     hof = []
-    stats = []  # TODO -
+    stats = []  # TODO - shouldn't be directly bound with current population? (not rely on list index)? (misaligned index, dynamic programming, unnecessarily complicate?)
     current_generation = 0
 
+    # FIXME - abstractmethod? (supply various selection methods - tournament, convection, random, roulette, etc.)
     def select(self, individuals, tournament_size, random_index_sequence):
         """Tournament selection, returns the index of the best individual from those taking part in the tournament"""
         best_index = None
@@ -39,6 +40,7 @@ class ExperimentABC(ABC):
         if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in evaluate()
             ind_list.append(new_individual)
 
+    # FIXME - abstractmethod? (supply various schemes of creating new pops - mutate-crossover-clones, elitism, etc.)
     def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
         """
         'individuals' is the input population (a list of individuals).
@@ -97,6 +99,7 @@ class ExperimentABC(ABC):
         print("...Loaded evolution state from '%s'" % state_filename)
         return True
 
+    # FIXME - make static?
     def get_state_filename(self, save_file_name):
         return None if save_file_name is None else save_file_name + '_state.pkl'
     
@@ -139,6 +142,11 @@ class ExperimentABC(ABC):
                 self.save_state(file_name) 
 
         return self.current_population.population, self.stats
+
+    # FIXME
+    # @abstractmethod
+    # def _initialize_evolution(self):
+    #     pass
 
     @abstractmethod
     def mutate(self, gen1):

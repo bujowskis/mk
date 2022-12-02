@@ -13,7 +13,7 @@ from .experiment_abc import ExperimentABC
 from .remove_diagonal import remove_diagonal
 
 
-BAD_FITNESS = None
+BAD_FITNESS = None  # todo - another definition?
 STATS_SAVE_ONLY_BEST_FITNESS = True
 
 
@@ -25,6 +25,7 @@ class DeapFitness(base.Fitness):
 
 
 class ExperimentNiching(ExperimentABC, ABC):
+    # TODO - documentation (w. available options)
     fit: str = "niching"
     normalize: str = "None"
 
@@ -33,14 +34,14 @@ class ExperimentNiching(ExperimentABC, ABC):
         
     def normalize_dissim(self, dissim_matrix):
         dissim_matrix = remove_diagonal(np.array(dissim_matrix))
-        if self.normalize == "none":
+        if self.normalize == "none":  # FIXME - lower-case none with upper-case None (normalize)
             return dissim_matrix
         elif self.normalize == "max":
             divide_by = np.max(dissim_matrix)
         elif self.normalize == "sum":
             divide_by = np.sum(dissim_matrix)
         else:
-            raise Exception(f"Wrong normalization method,", self.normalize)  # FIXME - should be moved into init
+            raise Exception(f"Wrong normalization method,", self.normalize)  # FIXME - should be moved into init (set once)
         if divide_by != 0:
             return dissim_matrix/divide_by
         else:
@@ -62,9 +63,11 @@ class ExperimentNiching(ExperimentABC, ABC):
             for i, d in zip(population_archive, dissim_list):
                 i.fitness = d
         else:
-            raise Exception("Wrong fit type: ", self.fit, f" chose correct one or implement new behaviour")
+            raise Exception("Wrong fit type: ", self.fit, f" chose correct one or implement new behaviour")  # FIXME - should be moved into init (set once)
 
         population_structures.update_archive(dissim_matrix, population_archive)
+
+    # FIXME - move the below dissimilarity methods into separate modules, accept as params
 
     def do_nsga2_dissim(self, population):
         """
@@ -100,7 +103,8 @@ class ExperimentNiching(ExperimentABC, ABC):
             new_individual.setAndEvaluate(genotype, self.evaluate)
             if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in frams_evaluate()
                 ind_list.append(new_individual)
-        
+
+        # FIXME
         def get_indyvidual(pop, c):
             if c < len(pop):
                 ind = pop[c]
@@ -149,6 +153,7 @@ class ExperimentNiching(ExperimentABC, ABC):
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
+            # FIXME - fixed with the above fixed (dissim methods)
             if self.fit != "raw" and self.fit !="nsga2" and self.fit !="nslc":
                 self.do_niching(self.current_population)
 
@@ -161,7 +166,7 @@ class ExperimentNiching(ExperimentABC, ABC):
             
             if hof_savefile is not None:
                 self.current_generation=g
-                self.timeelapsed += time.process_time() - time0
+                self.timeelapsed += time.process_time() - time0  # fixme - unresolved method
                 self.save_state(file_name) 
 
         return self.current_population.population, self.stats

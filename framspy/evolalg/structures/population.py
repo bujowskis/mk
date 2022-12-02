@@ -7,12 +7,13 @@ from ..base.remove_diagonal import remove_diagonal
 
 class PopulationStructures:
     def __init__(self, initial_individual, archive_size=0, popsize=100) -> None:
-        self.population_size = popsize
+        self.population_size = popsize  # fixme - why separate from len(population)? potentially dangerous (population.push())
         self.population = [initial_individual.copy() for _ in range(self.population_size)]
         self.archive = []
         self.archive_size = archive_size
 
     def change_individual(self, dissim):
+        # todo - what does it do? what for? why name not suggestive (change -> change state)?
         no_diagonal = remove_diagonal(dissim.copy())
         minval = np.min(no_diagonal)
         to_remove_pair = list(set(np.where(no_diagonal == minval)[0]))

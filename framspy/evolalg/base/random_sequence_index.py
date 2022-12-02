@@ -1,6 +1,7 @@
 import numpy as np 
 
 
+# FIXME - name order
 class RandomIndexSequence:
     """
     A helper function for tournament selection.

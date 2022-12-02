@@ -1,8 +1,8 @@
 class Individual:
     only_positive_fitness = True  # TODO - accept as param?
     # TODO - can't we do the below instead of __init__ with warning?
-    rawfitness: float
-    fitness: float
+    # rawfitness: float
+    # fitness: float
 
     def __init__(self):
         self.genotype = None
@@ -36,8 +36,8 @@ class Individual:
     def __str__(self):
         try:
             return "%g\t%g\t'%s'" % (self.rawfitness, self.fitness, self.genotype)
-        except:
+        except:  # fixme
             return "%g\t'%s'" % (self.rawfitness, self.genotype)
 
     def __gt__(self, other):
-        return self.rawfitness>other.rawfitness
+        return self.rawfitness > other.rawfitness

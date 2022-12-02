@@ -10,11 +10,11 @@ from .experiment_abc import ExperimentABC
 
 # FIXME - CamelCase
 class Experiment_Island(ExperimentABC, ABC):
-    # TODO - init with the params below?
+    # TODO - init with the params below? (__init__)
     number_of_populations: int = 5
     popsize: int = 100
     populations: List[PopulationStructures] = []
-    migration_interval = 10  # TODO - int OR method of migration? (as string)
+    migration_interval = 10  # TODO - int OR method of migration? (fixed number of generations, event-driven, etc.)
 
     def migrate_populations(self):
         pool_of_all_individuals = []

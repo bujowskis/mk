@@ -61,7 +61,7 @@ class ExperimentFrams(ExperimentABC):
             valid = self.check_valid_constraints(genotype,default_evaluation_data)
         if not valid:
             fitness = BAD_FITNESS
-        return fitness
+        return fitness  # fixme
 
     def get_state(self):
         return [self.timeelapsed, self.current_generation,self.current_population,self.hof,self.stats]
@@ -88,4 +88,8 @@ class ExperimentFrams(ExperimentABC):
         )
         self.hof.add(initial_individual)
         self.stats.append(initial_individual.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else initial_individual)
-        self.current_population = PopulationStructures(initial_individual=initial_individual, archive_size=0, popsize=self.popsize)
+        self.current_population = PopulationStructures(
+            initial_individual=initial_individual,
+            archive_size=0,
+            popsize=self.popsize
+        )

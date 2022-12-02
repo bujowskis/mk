@@ -15,11 +15,11 @@ STATS_SAVE_ONLY_BEST_FITNESS = True
 
 class ExperimentABC(ABC):
     """
-    TODO - documentation
+    TODO - documentation (here and functions)
     """
     current_population = []
     hof = []
-    stats = []
+    stats = []  # TODO -
     current_generation = 0
 
     def select(self, individuals, tournament_size, random_index_sequence):
@@ -101,10 +101,10 @@ class ExperimentABC(ABC):
         return None if save_file_name is None else save_file_name + '_state.pkl'
     
     def get_state(self):
-        return [self.current_generation,self.current_population,self.stats]
+        return [self.current_generation, self.current_population, self.stats]
 
-    def set_state(self,state):
-        self.current_generation,self.current_population,self.stats = state
+    def set_state(self, state):
+        self.current_generation, self.current_population, self.stats = state
 
     def update_stats(self, generation, all_individuals):
         worst = min(all_individuals, key=lambda item: item.rawfitness)
@@ -117,6 +117,7 @@ class ExperimentABC(ABC):
         """
         evolves for a given number of generations
         """
+        # FIXME - loading is shared across experiments and should be moved into separate function
         # load previously saved evolution state
         file_name = self.get_state_filename(hof_savefile)
         state = self.load_state(file_name)
@@ -125,10 +126,14 @@ class ExperimentABC(ABC):
             print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
         else:
             self._initialize_evolution(initialgenotype)  # FIXME - what happens here? not present in abc or @abstractmethod
+
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
+            # TODO - current_population.population? I'd assume current_population IS population
             self.current_population.population = self.make_new_population(self.current_population.population, pmut, pxov, tournament_size)
-            self.update_stats(g,self.current_population.population)
+            self.update_stats(g, self.current_population.population)
+
+            # FIXME - hof saving is shared across experiments and should be moved into separate function
             if hof_savefile is not None:
                 self.timeelapsed += time.process_time() - time0
                 self.save_state(file_name) 

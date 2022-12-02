@@ -7,6 +7,7 @@ from deap import base
 from deap import tools
 from deap.tools.emo import assignCrowdingDist
 
+# TODO - resolve namespace package
 from ..structures.individual import Individual
 from .experiment_abc import ExperimentABC
 from .remove_diagonal import remove_diagonal
@@ -17,10 +18,10 @@ STATS_SAVE_ONLY_BEST_FITNESS = True
 
 
 class DeapFitness(base.Fitness):
-        weights = (1, 1)
+    weights = (1, 1)  # todo - what for? used anywhere?
 
-        def __init__(self, *args, **kwargs):
-            super(DeapFitness, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(DeapFitness, self).__init__(*args, **kwargs)
 
 
 class ExperimentNiching(ExperimentABC, ABC):
@@ -28,7 +29,7 @@ class ExperimentNiching(ExperimentABC, ABC):
     normalize: str = "None"
 
     def transform_indexes(self, i, index_array):
-        return  [x+1 if x >= i else x for x in index_array]
+        return [x+1 if x >= i else x for x in index_array]
         
     def normalize_dissim(self, dissim_matrix):
         dissim_matrix = remove_diagonal(np.array(dissim_matrix))
@@ -39,7 +40,7 @@ class ExperimentNiching(ExperimentABC, ABC):
         elif self.normalize == "sum":
             divide_by = np.sum(dissim_matrix)
         else:
-            raise Exception(f"Wrong normalization method,",self.normalize)
+            raise Exception(f"Wrong normalization method,", self.normalize)  # FIXME - should be moved into init
         if divide_by != 0:
             return dissim_matrix/divide_by
         else:
@@ -47,29 +48,35 @@ class ExperimentNiching(ExperimentABC, ABC):
 
     def do_niching(self, population_structures):
         population_archive = population_structures.population + population_structures.archive
-        dissim_matrix =  self.dissimilarity(population_archive)
+        dissim_matrix = self.dissimilarity(population_archive)
+
         if "knn" not in self.fit:
-            dissim_list =  np.mean(self.normalize_dissim(dissim_matrix), axis=1)
+            dissim_list = np.mean(self.normalize_dissim(dissim_matrix), axis=1)
         else:
-            dissim_list = np.mean(np.partition(self.normalize_dissim(dissim_matrix), 5)[:,:5],axis=1)
-            
+            dissim_list = np.mean(np.partition(self.normalize_dissim(dissim_matrix), 5)[:,:5], axis=1)
+
         if "niching" in self.fit:
-            for i,d in zip(population_archive,dissim_list):
+            for i, d in zip(population_archive, dissim_list):
                 i.fitness = i.rawfitness * d
         elif "novelty" in self.fit:
-            for i,d in zip(population_archive,dissim_list):
+            for i, d in zip(population_archive, dissim_list):
                 i.fitness = d
         else:
-            raise Exception("Wrong fit type: ",self.fit,f" chose correct one or implement new behaviour")
-        population_structures.update_archive(dissim_matrix,population_archive)
+            raise Exception("Wrong fit type: ", self.fit, f" chose correct one or implement new behaviour")
+
+        population_structures.update_archive(dissim_matrix, population_archive)
 
     def do_nsga2_dissim(self, population):
+        """
+        two-criteria optimization NSGA-II (see https://drive.google.com/file/d/1XP7q9zo72OYlNCa-IFHaI9lHTtRJomYN/view)
+        """
         dissim_matrix = self.dissimilarity(population)
-        dissim_list =  np.mean(self.normalize_dissim(dissim_matrix), axis=1)
+        dissim_list = np.mean(self.normalize_dissim(dissim_matrix), axis=1)
         for i,d in zip(population,dissim_list):
             i.fitness = DeapFitness(tuple((d,i.rawfitness)))
 
     def do_nslc_dissim(self, population):
+        # TODO - Novelty Search with Local Competition?
         dissim_matrix = self.dissimilarity(population)
         normalized_matrix = self.normalize_dissim(dissim_matrix)
         for i in range(len(normalized_matrix)):
@@ -94,18 +101,18 @@ class ExperimentNiching(ExperimentABC, ABC):
             if new_individual.fitness is not None:  # this is how we defined BAD_FITNESS in frams_evaluate()
                 ind_list.append(new_individual)
         
-        counter = 0
-        def get_indyvidual(pop,c):
+        def get_indyvidual(pop, c):
             if c < len(pop):
                 ind = pop[c]
-                c +=1
-                return ind,c
+                c += 1
+                return ind, c
             else:
                 c = 0
                 ind = pop[c]
-                c +=1
-                return ind,c
-                
+                c += 1
+                return ind, c
+
+        counter = 0
         newpop = []
         while len(newpop) < expected_mut:
             ind,counter = get_indyvidual(offspring,counter)
@@ -138,7 +145,7 @@ class ExperimentNiching(ExperimentABC, ABC):
             self.current_generation += 1  # saved generation has been completed, start with the next one
             print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
         else:
-            self._initialize_evolution(self.genformat,initialgenotype)
+            self._initialize_evolution(self.genformat,initialgenotype)  # FIXME - unresolved method
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
@@ -161,4 +168,5 @@ class ExperimentNiching(ExperimentABC, ABC):
 
     @abstractmethod
     def dissimilarity(self, population: list):
+        # FIXME - documentation, guidelines, etc.
         pass

@@ -1,11 +1,12 @@
-
+# FIXME - relative import outside of package
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
 from ..frams_base.experiment_frams import ExperimentFrams
 from ..base.experiment_island_model_abc import Experiment_Island
 
+
 class ExperimentFramsIslands(Experiment_Island, ExperimentFrams):
-    def __init__(self,frams_lib, optimization_criteria, hof_size, popsize, constraints, genformat, number_of_populations, migration_interval, archive_size=0) -> None:
+    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, constraints, genformat, number_of_populations, migration_interval, archive_size=0) -> None:
         super().__init__(frams_lib, optimization_criteria, hof_size, popsize, genformat, constraints)
         self.archive_size = archive_size
         self.number_of_populations = number_of_populations

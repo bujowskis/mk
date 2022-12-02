@@ -1,25 +1,31 @@
+# FIXME - relative import outside of package
 from ..base.experiment_abc import ExperimentABC, STATS_SAVE_ONLY_BEST_FITNESS
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
 from ..structures.hall_of_fame import HallOfFame
 
-BAD_FITNESS = None
+BAD_FITNESS = None  # FIXME - use the one defined in experiment_abc.py
+
 
 class ExperimentFrams(ExperimentABC):
-    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, genformat, constraints={}) -> None:
-        self.optimization_criteria = optimization_criteria 
+    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, genformat, constraints=None) -> None:
+        if constraints is None:
+            constraints = {}
+        self.optimization_criteria = optimization_criteria
         self.frams_lib = frams_lib
         self.constraints = constraints
         self.hof = HallOfFame(hof_size)
         self.popsize = popsize
         self.genformat = genformat
 
-        
     def frams_getsimplest(self, genetic_format, initial_genotype):
-        return initial_genotype if initial_genotype is not None else self.frams_lib.getSimplest(genetic_format)
+        if initial_genotype is not None:
+            return initial_genotype
+        else:
+            return self.frams_lib.getSimplest(genetic_format)
 
     def genotype_within_constraint(self, genotype, dict_criteria_values, criterion_name, constraint_value):
-        REPORT_CONSTRAINT_VIOLATIONS = False
+        REPORT_CONSTRAINT_VIOLATIONS = False  # FIXME - accept as param?
         if constraint_value is not None:
             actual_value = dict_criteria_values[criterion_name]
             if actual_value > constraint_value:
@@ -28,7 +34,7 @@ class ExperimentFrams(ExperimentABC):
                 return False
         return True
 
-    def check_valid_constraints(self,genotype,default_evaluation_data):
+    def check_valid_constraints(self, genotype, default_evaluation_data):
         valid = True
         valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numparts', self.constraints.get('max_numparts'))
         valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numjoints', self.constraints.get('max_numjoints'))
@@ -38,6 +44,7 @@ class ExperimentFrams(ExperimentABC):
         return valid
 
     def evaluate(self, genotype):
+        # TODO - documentation - evaluate_genotype (individual)?
         data = self.frams_lib.evaluate([genotype])
         # print("Evaluated '%s'" % genotype, 'evaluation is:', data)
         valid = True
@@ -75,7 +82,10 @@ class ExperimentFrams(ExperimentABC):
         self.timeelapsed = 0
         self.stats = []  # stores the best individuals, one from each generation
         initial_individual = Individual()
-        initial_individual.setAndEvaluate(self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype), self.evaluate)
+        initial_individual.setAndEvaluate(
+            self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype),
+            self.evaluate
+        )
         self.hof.add(initial_individual)
         self.stats.append(initial_individual.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else initial_individual)
         self.current_population = PopulationStructures(initial_individual=initial_individual, archive_size=0, popsize=self.popsize)

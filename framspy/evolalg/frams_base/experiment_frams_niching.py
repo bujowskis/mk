@@ -1,3 +1,4 @@
+# TODO - relative import outside package
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
 from ..base.experiment_niching_abc import ExperimentNiching, DeapFitness
@@ -5,7 +6,7 @@ from .experiment_frams import STATS_SAVE_ONLY_BEST_FITNESS, ExperimentFrams
 
 
 class ExperimentFramsNiching(ExperimentFrams, ExperimentNiching):
-    def __init__(self,frams_lib, optimization_criteria, hof_size, popsize, constraints, normalize, dissim, fit, genformat, archive_size) -> None:
+    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, constraints, normalize, dissim, fit, genformat, archive_size) -> None:
         super().__init__(frams_lib, optimization_criteria, hof_size, popsize, constraints)
         self.normalize = normalize
         self.dissim = dissim
@@ -13,6 +14,7 @@ class ExperimentFramsNiching(ExperimentFrams, ExperimentNiching):
         self.genformat = genformat
         self.archive_size = archive_size
 
+    # TODO - signature doesn't match
     def _initialize_evolution(self, genformat, initialgenotype):
         self.current_generation = 0
         self.timeelapsed = 0
@@ -26,7 +28,6 @@ class ExperimentFramsNiching(ExperimentFrams, ExperimentNiching):
             self.do_nsga2_dissim(self.current_population.population)
         if self.fit == "nslc":
             self.do_nslc_dissim(self.current_population.population)
-
 
     def dissimilarity(self, population):
         return self.frams_lib.dissimilarity([i.genotype for i in population], self.dissim)

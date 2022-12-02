@@ -1,5 +1,9 @@
 class Individual:
-    only_positive_fitness = True
+    only_positive_fitness = True  # TODO - accept as param?
+    # TODO - can't we do the below instead of __init__ with warning?
+    rawfitness: float
+    fitness: float
+
     def __init__(self):
         self.genotype = None
         self.rawfitness: float = None  # used for stats. This is raw fitness value, None = not evaluated or invalid genotype
@@ -11,7 +15,7 @@ class Individual:
         self.fitness = individual.fitness
         return self
 
-    def copy(self):
+    def copy(self):  # FIXME - deep_copy()?
         new_copy = Individual()
         new_copy.genotype = self.genotype
         new_copy.rawfitness = self.rawfitness
@@ -28,7 +32,7 @@ class Individual:
                     fitness = 0
         self.fitness = self.rawfitness = fitness
 
-
+    # TODO - other methods (lt, eq, etc.)?
     def __str__(self):
         try:
             return "%g\t%g\t'%s'" % (self.rawfitness, self.fitness, self.genotype)

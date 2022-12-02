@@ -1,20 +1,18 @@
 class HallOfFame:
-	"""A simple function that keeps the specified number of individuals, adding only better ones.
-	The list remains sorted from best to worst."""
-
+	"""
+	A simple feature that keeps the specified number of individuals, adding only better ones.
+	The list remains sorted from best to worst.
+	"""
 
 	def __init__(self, hofsize):
 		self.hofsize = hofsize
 		self.hof = []
 
-
 	def __iter__(self):
 		return iter(self.hof)
 
-
 	def __len__(self):
 		return len(self.hof)
-
 
 	def add(self, individual):
 		if len(self.hof) < 1:  # empty hof?

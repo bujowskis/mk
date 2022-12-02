@@ -1,10 +1,12 @@
 import numpy as np
 import random
 
+# FIXME - relative import outside package
 from ..base.remove_diagonal import remove_diagonal
 
+
 class PopulationStructures:
-    def __init__(self,  initial_individual, archive_size=0, popsize=100) -> None:
+    def __init__(self, initial_individual, archive_size=0, popsize=100) -> None:
         self.population_size = popsize
         self.population = [initial_individual.copy() for _ in range(self.population_size)]
         self.archive = []
@@ -13,7 +15,7 @@ class PopulationStructures:
     def change_individual(self, dissim):
         no_diagonal = remove_diagonal(dissim.copy())
         minval = np.min(no_diagonal)
-        to_remove_pair = list(set(np.where(no_diagonal==minval)[0]))
+        to_remove_pair = list(set(np.where(no_diagonal == minval)[0]))
         last_index = len(dissim)-1
         if last_index in to_remove_pair:
             return last_index
@@ -32,5 +34,3 @@ class PopulationStructures:
                 current_archive_ind.pop(to_remove)
 
         self.archive = np.array(population_archive)[current_archive_ind].tolist()
-    
-

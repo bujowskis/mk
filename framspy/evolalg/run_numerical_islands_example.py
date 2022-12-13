@@ -1,16 +1,19 @@
-from .numerical_example.numerical_example import ExperimentNumerical
+from .numerical_example.numerical_islands_example import \
+    ExperimentNumericalIslands
 
 
 def main():
-    parsed_args = ExperimentNumerical.get_args_for_parser().parse_args()
+    parsed_args = ExperimentNumericalIslands.get_args_for_parser().parse_args()
     print("Argument values:", ", ".join(
         ['%s=%s' % (arg, getattr(parsed_args, arg)) for arg in vars(parsed_args)]))
 
     initialgenotype = [100, 100, 100, 100]
     print('Best individuals:')
-    experiment = ExperimentNumerical(
+    experiment = ExperimentNumericalIslands(
         hof_size=parsed_args.hof_size,
         popsize=parsed_args.popsize,
+        migration_interval=parsed_args.generations_migration,
+        number_of_populations=parsed_args.islands,
         save_only_best=parsed_args.save_only_best)
 
     hof, stats = experiment.evolve(hof_savefile=parsed_args.hof_savefile,

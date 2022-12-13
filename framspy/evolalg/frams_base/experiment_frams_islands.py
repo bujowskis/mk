@@ -1,31 +1,36 @@
-# FIXME - relative import outside of package
+
+from ..base.experiment_islands_model_abc import ExperimentIslands
+from ..frams_base.experiment_frams import ExperimentFrams
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
-from ..frams_base.experiment_frams import ExperimentFrams
-from ..base.experiment_island_model_abc import Experiment_Island
+from ..utils import merge_two_parsers
 
 
-class ExperimentFramsIslands(Experiment_Island, ExperimentFrams):
-    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, constraints, genformat,
-                 number_of_populations, migration_interval, archive_size=0) -> None:
-        super().__init__(frams_lib, optimization_criteria, hof_size, popsize, genformat, constraints)
-        self.archive_size = archive_size
+class ExperimentFramsIslands(ExperimentIslands, ExperimentFrams):
+    def __init__(self, frams_lib, optimization_criteria, hof_size,
+                 popsize, constraints, genformat,
+                 number_of_populations, migration_interval, save_only_best) -> None:
+        ExperimentFrams.__init__(self, frams_lib=frams_lib, optimization_criteria=optimization_criteria,
+                                 hof_size=hof_size, popsize=popsize,
+                                 genformat=genformat, save_only_best=save_only_best, constraints=constraints)
+
         self.number_of_populations = number_of_populations
         self.migration_interval = migration_interval
 
-    def _initialize_evolution(self, initialgenotype):
+    def initialize_evolution(self, initialgenotype):
         self.current_generation = 0
-        self.timeelapsed = 0
-        self.stats = []  # stores the best individuals, one from each generation across all populations
+        self.time_elapsed = 0
+        # stores the best individuals, one from each generation across all populations
+        self.stats = []
         initial_individual = Individual()
-        initial_individual.setAndEvaluate(
-            self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype), self.evaluate)
+        initial_individual.set_and_evaluate(self.frams_getsimplest(
+            '1' if self.genformat is None else self.genformat, initialgenotype), self.evaluate)
         self.stats.append(initial_individual.rawfitness)
-        [  # todo - vectorized "for"? (equivalent of for loop) - ADAM
-            self.populations.append(
-                PopulationStructures(
-                    initial_individual=initial_individual,
-                    archive_size=self.archive_size,
-                    popsize=self.popsize)
-            ) for _ in range(self.number_of_populations)
-        ]
+        self.populations= [PopulationStructures(initial_individual=initial_individual,
+                                              popsize=self.popsize)
+                         for _ in range(self.number_of_populations)]
+    @staticmethod
+    def get_args_for_parser():
+        parser1 = ExperimentFrams.get_args_for_parser()
+        parser2 = ExperimentIslands.get_args_for_parser()
+        return merge_two_parsers(parser1, parser2)

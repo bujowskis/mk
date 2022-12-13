@@ -1,3 +1,7 @@
+"""
+NOTE - some ideas on how to approach modularity
+"""
+
 import experiment_abc
 
 """

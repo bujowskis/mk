@@ -1,14 +1,10 @@
-import numpy as np 
+import numpy as np
 
 
-# FIXME - name order
-#   (RSI) - talk with Adam
 class RandomIndexSequence:
-    """
-    A helper function for tournament selection.
-    Allows each individual to take part in a tournament, thus reducing the risk of overlooking individuals by not
-    sampling them due to uncontrolled randomness, as can happen in the naive implementation of tournament selection.
-    """
+    """A helper function for tournament selection. Allows each individual to take part in a tournament,
+    thus reducing the risk of overlooking individuals by not sampling them due to uncontrolled
+    randomness, as can happen in the naive implementation of tournament selection."""
 
     def __init__(self, popsize):
         self.popsize: int = popsize

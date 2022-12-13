@@ -1,41 +1,54 @@
-# TODO - relative import outside package
+from ..base.experiment_niching_abc import ExperimentNiching
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
-from ..base.experiment_niching_abc import ExperimentNiching, DeapFitness
-from .experiment_frams import STATS_SAVE_ONLY_BEST_FITNESS, ExperimentFrams
+from ..utils import merge_two_parsers
+from .experiment_frams import ExperimentFrams
 
 
 class ExperimentFramsNiching(ExperimentFrams, ExperimentNiching):
-    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, constraints, normalize, dissim, fit, genformat, archive_size) -> None:
-        super().__init__(frams_lib, optimization_criteria, hof_size, popsize, constraints)
-        self.normalize = normalize
+    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, constraints, normalize, dissim, fit, genformat, archive_size, save_only_best) -> None:
+        ExperimentFrams.__init__(self, hof_size=hof_size,
+                                 popsize=popsize,
+                                 frams_lib=frams_lib,
+                                 constraints=constraints,
+                                 optimization_criteria=optimization_criteria,
+                                 genformat=genformat,
+                                 save_only_best=save_only_best
+                                 )
+        ExperimentNiching.__init__(self, hof_size=hof_size,
+                                   popsize=popsize,
+                                   fit=fit,
+                                   normalize=normalize,
+                                   save_only_best=save_only_best,
+                                   archive_size=archive_size
+                                   )
         self.dissim = dissim
-        self.fit = fit
-        self.genformat = genformat
-        self.archive_size = archive_size
+        
 
-    # TODO - signature doesn't match
-    def _initialize_evolution(self, genformat, initialgenotype):
+    def initialize_evolution(self, genformat, initialgenotype):
         self.current_generation = 0
-        self.timeelapsed = 0
+        self.time_elapsed = 0
         self.stats = []  # stores the best individuals, one from each generation
         initial_individual = Individual()
-        initial_individual.setAndEvaluate(
-            self.frams_getsimplest('1' if genformat is None else genformat, initialgenotype),
-            self.evaluate
-        )
+        initial_individual.set_and_evaluate(self.frams_getsimplest(
+            '1' if genformat is None else genformat, initialgenotype), self.evaluate)
         self.hof.add(initial_individual)
-        self.stats.append(initial_individual.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else initial_individual)
-        self.current_population = PopulationStructures(
-            initial_individual=initial_individual,
-            archive_size=self.archive_size,
-            popsize=self.popsize
-        )
+        self.stats.append(
+            initial_individual.rawfitness if self.save_only_best else initial_individual)
+        self.population_structures = PopulationStructures(
+            initial_individual=initial_individual, archive_size=self.archive_size, popsize=self.popsize)
         if self.fit == "nsga2":
-            self.do_nsga2_dissim(self.current_population.population)
+            self.do_nsga2_dissim(self.population_structures.population)
         if self.fit == "nslc":
-            self.do_nslc_dissim(self.current_population.population)
+            self.do_nslc_dissim(self.population_structures.population)
 
-    # fixme - documentation for ExperimentNiching
     def dissimilarity(self, population):
         return self.frams_lib.dissimilarity([i.genotype for i in population], self.dissim)
+
+
+    @staticmethod
+    def get_args_for_parser():
+        p1 = ExperimentFrams.get_args_for_parser()
+        p2 = ExperimentNiching.get_args_for_parser()
+        return merge_two_parsers(p1, p2)
+

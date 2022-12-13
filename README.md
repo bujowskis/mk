@@ -1,8 +1,8 @@
 # Convection Selection Młoda Kadra Project
+- Framsticks50rc23
 
 ## NOTES TO SELF
-- when using PyCharm, opening `framspy` 
-- 
+- when using PyCharm, opening `framspy`
 
 ## Setup - Windows
 ### Structure / workspace

@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 from deap import creator, base, tools, algorithms
-from framspy.evolalg.FramsticksLib.FramsticksLib import FramsticksLib
+from FramsticksLib import FramsticksLib
 
 
 # Note: this may be less efficient than running the evolution directly in Framsticks, so if performance is key, compare both options.
@@ -63,7 +63,7 @@ def frams_getsimplest(frams_cli, genetic_format, initial_genotype):
 	return initial_genotype if initial_genotype is not None else frams_cli.getSimplest(genetic_format)
 
 
-def prepareToolbox(frams_cli, tournament_size, genetic_format, initial_genotype):
+def prepareToolbox(frams_cli, OPTIMIZATION_CRITERIA, tournament_size, genetic_format, initial_genotype):
 	creator.create("FitnessMax", base.Fitness, weights=[1.0] * len(OPTIMIZATION_CRITERIA))
 	creator.create("Individual", list, fitness=creator.FitnessMax)  # would be nice to have "str" instead of unnecessary "list of str"
 
@@ -122,29 +122,27 @@ def ensureDir(string):
 
 def save_genotypes(filename, OPTIMIZATION_CRITERIA, hof):
 	from framsfiles import writer as framswriter
-	with open(filename, "a") as outfile:
+	with open(filename, "w") as outfile:
 		for ind in hof:
 			keyval = {}
 			for i, k in enumerate(OPTIMIZATION_CRITERIA):  # construct a dictionary with criteria names and their values
 				keyval[k] = ind.fitness.values[i]  # TODO it would be better to save in Individual (after evaluation) all fields returned by Framsticks, and get these fields here, not just the criteria that were actually used as fitness in evolution.
 			# Note: prior to the release of Framsticks 5.0, saving e.g. numparts (i.e. P) without J,N,C breaks re-calcucation of P,J,N,C in Framsticks and they appear to be zero (nothing serious).
 			outfile.write(framswriter.from_collection({"_classname": "org", "genotype": ind[0], **keyval}))
-			# outfile.write(framswriter.from_collection({**keyval})) # changed to save only vertpos fitness values
 			outfile.write("\n")
 	print("Saved '%s' (%d)" % (filename, len(hof)))
 
 
-if __name__ == "__main__":
+def main():
+	global parsed_args, OPTIMIZATION_CRITERIA  # needed in frams_evaluate(), so made global to avoid passing as arguments
+
 	# random.seed(123)  # see FramsticksLib.DETERMINISTIC below, set to True if you want full determinism
 	FramsticksLib.DETERMINISTIC = False  # must be set before FramsticksLib() constructor call
 	parsed_args = parseArguments()
 	print("Argument values:", ", ".join(['%s=%s' % (arg, getattr(parsed_args, arg)) for arg in vars(parsed_args)]))
-
 	OPTIMIZATION_CRITERIA = parsed_args.opt.split(",")
 	framsLib = FramsticksLib(parsed_args.path, parsed_args.lib, parsed_args.sim.split(";"))
-
-	toolbox = prepareToolbox(framsLib, parsed_args.tournament, '1' if parsed_args.genformat is None else parsed_args.genformat, parsed_args.initialgenotype)
-
+	toolbox = prepareToolbox(framsLib, OPTIMIZATION_CRITERIA, parsed_args.tournament, '1' if parsed_args.genformat is None else parsed_args.genformat, parsed_args.initialgenotype)
 	pop = toolbox.population(n=parsed_args.popsize)
 	hof = tools.HallOfFame(parsed_args.hof_size)
 	stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -152,15 +150,13 @@ if __name__ == "__main__":
 	stats.register("stddev", np.std)
 	stats.register("min", np.min)
 	stats.register("max", np.max)
-
 	pop, log = algorithms.eaSimple(pop, toolbox, cxpb=parsed_args.pxov, mutpb=parsed_args.pmut, ngen=parsed_args.generations, stats=stats, halloffame=hof, verbose=True)
 	print('Best individuals:')
-	results = dict()
 	for ind in hof:
 		print(ind.fitness, '\t-->\t', ind[0])
-
 	if parsed_args.hof_savefile is not None:
 		save_genotypes(parsed_args.hof_savefile, OPTIMIZATION_CRITERIA, hof)
 
 
-
+if __name__ == "__main__":
+	main()

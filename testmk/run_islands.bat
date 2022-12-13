@@ -1,0 +1,1 @@
+python -m evolalg.run_frams_islands -path C:\Users\ADMIN\Downloads\Framsticks50rc23 -n_pop=5 -m_interv=10 -opt vertpos -genformat 1 -max_numparts 15 -max_numneurons 15 -max_numjoints 30 -max_numconnections 30  -max_numgenochars 10000 -popsize 100 -generations 100  -hof_savefile foo.gen

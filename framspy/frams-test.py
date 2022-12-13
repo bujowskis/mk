@@ -101,7 +101,7 @@ for g in frams.GenePools[0]:  # loop over all genotypes, even though we know we 
 
 # sampling a Model in 3D
 geno = "RXX(X,CXXX)"
-print("\nNow build a Model from the genotype '%s' and sample it in 3D, then print a 2D projection" % geno)
+print("\nNow build a Model from the genotype '%s' and sample it in 3D, then print a 2D projection." % geno)
 import numpy as np
 
 matrix = np.zeros((20, 20, 20), dtype=int)  # 3D matrix, "voxels"

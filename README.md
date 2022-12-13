@@ -1,4 +1,25 @@
 # Convection Selection Młoda Kadra Project
+- Framsticks50rc23
+
+## NOTES TO SELF
+- when using PyCharm, opening `framspy`
+
+## Setup - Windows
+### Structure / workspace
+- scripts work if they go directly into framspy folder
+- `todo` - what if I want to use framspy anywhere else, create scripts outside framspy dir?
+  - (basically, that's how it's done when using all kinds of modules, packages)
+
+### Environment Variables
+```commandline
+setx FRAMS_PATH "C:\Users\ADMIN\PycharmProjects\mk\framspy"
+```
+```commandline
+setx DIR_WITH_FRAMS_LIBRARY "C:\Users\ADMIN\PycharmProjects\mk\framspy"
+```
+```commandline
+setx FRAMSTICKS_DIR "C:\Users\ADMIN\Downloads\Framsticks50rc23"
+```
 
 ## How stuff works
 - [gdoc](https://docs.google.com/document/d/1LAyeRrTTnjC1XVllBG8wzMZP7a-6MYHS5lWjI2oFwi0/edit?usp=sharing)

@@ -336,7 +336,7 @@ def init(*args):
 			original_dir = os.getcwd()
 			os.chdir(lib_path)  # because under Windows, frams-objects.dll requires other dll's which reside in the same directory, so we must change current dir for them to be found while loading the main dll.
 		else:
-			os.add_dll_directory(lib_path)
+			os.add_dll_directory(os.path.abspath(lib_path))
 	abs_data = os.path.join(os.path.abspath(lib_path), "data")  # use absolute path for -d and -D so python is free to cd anywhere without confusing Framsticks
 
 	# for the hypothetical case without lib_path the abs_data must be obtained from somewhere else

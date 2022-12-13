@@ -1,22 +1,18 @@
-import time
-
-from ..base.experiment_abc import ExperimentABC, STATS_SAVE_ONLY_BEST_FITNESS
+from ..base.experiment_abc import ExperimentABC
+from ..constants import BAD_FITNESS
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
-from ..structures.hall_of_fame import HallOfFame
+from ..utils import ensureDir
 
-BAD_FITNESS = None
 
 class ExperimentFrams(ExperimentABC):
-    def __init__(self, frams_lib, optimization_criteria, hof_size, popsize, genformat, constraints={}) -> None:
-        self.optimization_criteria = optimization_criteria 
+    def __init__(self, hof_size, popsize, frams_lib, optimization_criteria, genformat, save_only_best=True, constraints={}) -> None:
+        ExperimentABC.__init__(self, hof_size=hof_size, popsize=popsize, save_only_best=save_only_best)
+        self.optimization_criteria = optimization_criteria
         self.frams_lib = frams_lib
         self.constraints = constraints
-        self.hof = HallOfFame(hof_size)
-        self.popsize = popsize
         self.genformat = genformat
 
-        
     def frams_getsimplest(self, genetic_format, initial_genotype):
         return initial_genotype if initial_genotype is not None else self.frams_lib.getSimplest(genetic_format)
 
@@ -26,17 +22,23 @@ class ExperimentFrams(ExperimentABC):
             actual_value = dict_criteria_values[criterion_name]
             if actual_value > constraint_value:
                 if REPORT_CONSTRAINT_VIOLATIONS:
-                    print('Genotype "%s" assigned low fitness because it violates constraint "%s": %s exceeds threshold %s' % (genotype, criterion_name, actual_value, constraint_value))
+                    print('Genotype "%s" assigned low fitness because it violates constraint "%s": %s exceeds threshold %s' % (
+                        genotype, criterion_name, actual_value, constraint_value))
                 return False
         return True
 
-    def check_valid_constraints(self,genotype,default_evaluation_data):
+    def check_valid_constraints(self, genotype, default_evaluation_data):
         valid = True
-        valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numparts', self.constraints.get('max_numparts'))
-        valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numjoints', self.constraints.get('max_numjoints'))
-        valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numneurons', self.constraints.get('max_numneurons'))
-        valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numconnections', self.constraints.get('max_numconnections'))
-        valid &= self.genotype_within_constraint(genotype, default_evaluation_data, 'numgenocharacters', self.constraints.get('max_numgenochars'))
+        valid &= self.genotype_within_constraint(
+            genotype, default_evaluation_data, 'numparts', self.constraints.get('max_numparts'))
+        valid &= self.genotype_within_constraint(
+            genotype, default_evaluation_data, 'numjoints', self.constraints.get('max_numjoints'))
+        valid &= self.genotype_within_constraint(
+            genotype, default_evaluation_data, 'numneurons', self.constraints.get('max_numneurons'))
+        valid &= self.genotype_within_constraint(
+            genotype, default_evaluation_data, 'numconnections', self.constraints.get('max_numconnections'))
+        valid &= self.genotype_within_constraint(
+            genotype, default_evaluation_data, 'numgenocharacters', self.constraints.get('max_numgenochars'))
         return valid
 
     def evaluate(self, genotype):
@@ -47,24 +49,19 @@ class ExperimentFrams(ExperimentABC):
             first_genotype_data = data[0]
             evaluation_data = first_genotype_data["evaluations"]
             default_evaluation_data = evaluation_data[""]
-            fitness = [default_evaluation_data[crit] for crit in self.optimization_criteria]
-        except (KeyError, TypeError) as e:  # the evaluation may have failed for an invalid genotype (such as X[@][@] with "Don't simulate genotypes with warnings" option) or for some other reason
+            fitness = [default_evaluation_data[crit] for crit in self.optimization_criteria][0]
+        # the evaluation may have failed for an invalid genotype (such as X[@][@] with "Don't simulate genotypes with warnings" option) or for some other reason
+        except (KeyError, TypeError) as e:
             valid = False
-            print('Problem "%s" so could not evaluate genotype "%s", hence assigned it fitness: %s' % (str(e), genotype, BAD_FITNESS))
-        if valid: #TODO Refactor/Change to dict
+            print('Problem "%s" so could not evaluate genotype "%s", hence assigned it fitness: %s' % (
+                str(e), genotype, BAD_FITNESS))
+        if valid:
             default_evaluation_data['numgenocharacters'] = len(genotype)  # for consistent constraint checking below
-            valid = self.check_valid_constraints(genotype,default_evaluation_data)
+            valid = self.check_valid_constraints(genotype, default_evaluation_data) 
         if not valid:
             fitness = BAD_FITNESS
         return fitness
-
-    def get_state(self):
-        return [self.timeelapsed, self.current_genneration,self.current_population,self.hof,self.stats]
-
-    def set_state(self,state):
-        self.timeelapsed, self.current_genneration,self.current_population,hof_,self.stats = state
-        for h in sorted(hof_, key=lambda x: x.rawfitness):  # sorting: ensure that we add from worst to best so all individuals are added to HOF
-            self.hof.add(h)
+        
 
     def mutate(self, gen1):
         return self.frams_lib.mutate([gen1])[0]
@@ -72,32 +69,58 @@ class ExperimentFrams(ExperimentABC):
     def cross_over(self, gen1, gen2):
         return self.frams_lib.crossOver(gen1, gen2)
 
-    def _initialize_evolution(self, initialgenotype):
-        self.current_genneration = 0
-        self.timeelapsed = 0
+    def initialize_evolution(self, initialgenotype):
+        self.current_generation = 0
+        self.time_elapsed = 0
         self.stats = []  # stores the best individuals, one from each generation
-        initial_individual = Individual(self.evaluate)
-        initial_individual.setAndEvaluate(self.frams_getsimplest('1' if self.genformat is None else self.genformat, initialgenotype))
+        initial_individual = Individual()
+        initial_individual.set_and_evaluate(self.frams_getsimplest(
+            '1' if self.genformat is None else self.genformat, initialgenotype), self.evaluate)
         self.hof.add(initial_individual)
-        self.stats.append(initial_individual.rawfitness if STATS_SAVE_ONLY_BEST_FITNESS else initial_individual)
-        self.current_population = PopulationStructures(self.evaluate, initial_individual=initial_individual, archive_size=0, popsize=self.popsize)
+        self.stats.append(
+            initial_individual.rawfitness if self.save_only_best else initial_individual)
+        self.population_structures = PopulationStructures(
+            initial_individual=initial_individual, popsize=self.popsize)
 
+    def save_genotypes(self, filename):
+        from framsfiles import writer as framswriter
+        with open(filename, "w") as outfile:
+            for ind in self.hof:
+                keyval = {}
+                # construct a dictionary with criteria names and their values
+                for i, k in enumerate(self.optimization_criteria):
+                    # .values[i]  # TODO it would be better to save in Individual (after evaluation) all fields returned by Framsticks, and get these fields here, not just the criteria that were actually used as fitness in evolution.
+                    keyval[k] = ind.rawfitness
+                # Note: prior to the release of Framsticks 5.0, saving e.g. numparts (i.e. P) without J,N,C breaks re-calcucation of P,J,N,C in Framsticks and they appear to be zero (nothing serious).
+                outfile.write(framswriter.from_collection(
+                    {"_classname": "org", "genotype": ind.genotype, **keyval}))
+                outfile.write("\n")
+        print("Saved '%s' (%d)" % (filename, len(self.hof)))
 
-    def evolve(self,hof_savefile,generations, initialgenotype, pmut, pxov, tournament_size):
-        file_name = self.get_state_filename(hof_savefile)
-        state = self.load_state(file_name)
-        if state is not None:  # loaded state from file
-            self.current_genneration += 1  # saved generation has been completed, start with the next one
-            print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.current_population.population), len(self.hof), len(self.stats),  (len(self.current_population.archive)),self.current_genneration, generations))  # self.current_genneration (and g) are 0-based, parsed_args.generations is 1-based
+    @staticmethod
+    def get_args_for_parser():
+        parser = ExperimentABC.get_args_for_parser()
+        parser.add_argument('-path',type= ensureDir, required= True,
+                        help= 'Path to Framsticks CLI without trailing slash.')
+        parser.add_argument('-lib',type= str, required= False,
+                        help= 'Library name. If not given, "frams-objects.dll" or "frams-objects.so" is assumed depending on the platform.')
+        parser.add_argument('-sim',type= str, required= False, default= "eval-allcriteria.sim",
+                        help="The name of the .sim file with settings for evaluation, mutation, crossover, and similarity estimation. If not given, \"eval-allcriteria.sim\" is assumed by default. Must be compatible with the \"standard-eval\" expdef. If you want to provide more files, separate them with a semicolon ';'.")
 
-        else:
-            self._initialize_evolution(initialgenotype)
-        time0 = time.process_time()
-        for g in range(self.current_genneration, generations):
-            self.current_population.population = self.make_new_population(self.current_population.population, pmut, pxov, tournament_size)
-            self.update_stats(g,self.current_population.population)
-            if hof_savefile is not None:
-                self.timeelapsed += time.process_time() - time0
-                self.save_state(file_name) 
+        parser.add_argument('-genformat',type= str, required= False,
+                            help= 'Genetic format for the simplest initial genotype, for example 4, 9, or B. If not given, f1 is assumed.')
+        parser.add_argument('-initialgenotype',type= str, required= False,
+                                    help= 'The genotype used to seed the initial population. If given, the -genformat argument is ignored.')
+        parser.add_argument('-opt',required=True, help='optimization criteria: vertpos, velocity, distance, vertvel, lifespan, numjoints, numparts, numneurons, numconnections (or other as long as it is provided by the .sim file and its .expdef).')
 
-        return self.current_population.population, self.stats
+        parser.add_argument('-max_numparts',type= int, default= None,
+                                help="Maximum number of Parts. Default: no limit")
+        parser.add_argument('-max_numjoints',type= int, default= None,
+                                help="Maximum number of Joints. Default: no limit")
+        parser.add_argument('-max_numneurons',type= int, default= None,
+                                help="Maximum number of Neurons. Default: no limit")
+        parser.add_argument('-max_numconnections',type= int, default= None,
+                                    help="Maximum number of Neural connections. Default: no limit")
+        parser.add_argument('-max_numgenochars',type= int, default= None,
+                                    help="Maximum number of characters in genotype (including the format prefix, if any}. Default: no limit")
+        return parser

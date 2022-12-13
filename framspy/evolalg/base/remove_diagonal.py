@@ -1,8 +1,11 @@
 import numpy as np
 
-def remove_diagonal(A):
-    A = np.array(A)
-    m = A.shape[0]
+
+def remove_diagonal(arrays):
+    numpy_arrays = np.array(arrays)
+    n_of_arrays = numpy_arrays.shape[0]
     strided = np.lib.stride_tricks.as_strided
-    s0,s1 = A.strides
-    return strided(A.ravel()[1:], shape=(m-1,m), strides=(s0+s1,s1)).reshape(m,-1)
+    stride_0, stride_1 = numpy_arrays.strides
+    return strided(numpy_arrays.ravel()[1:],
+                   shape=(n_of_arrays-1, n_of_arrays),
+                   strides=(stride_0+stride_1, stride_1)).reshape(n_of_arrays, -1)

@@ -18,13 +18,18 @@ def main():
     parsed_args = args_parser.parse_args()
     # print("Argument values:", ", ".join(['%s=%s' % (arg, getattr(parsed_args, arg)) for arg in vars(parsed_args)]))
 
-    initialgenotype = np.random.uniform(low=0.5, high=13.3, size=(parsed_args.dimensions,))
     if parsed_args.benchmark_function not in AVAILABLE_FUNCTIONS:
         raise Exception(f'wrong function - choose one from the following: {AVAILABLE_FUNCTIONS}')
     benchmark_function = \
         bf.Ackley(n_dimensions=parsed_args.dimensions, opposite=True) if parsed_args.benchmark_function == 'Ackley' else \
         bf.EggHolder(n_dimensions=parsed_args.dimensions, opposite=True) if parsed_args.benchmark_function == 'EggHolder' else \
         bf.Schaffer2(opposite=True)
+    initial_bounds = benchmark_function.suggested_bounds()
+    initialgenotype = np.random.uniform(
+        low=initial_bounds[0][0],
+        high=initial_bounds[1][0],
+        size=(parsed_args.dimensions,)
+    )
 
     print('Best individuals:')
     experiment = ExperimentNumericalComplex(

@@ -142,8 +142,8 @@ class ExperimentABC(ABC):
 
     def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
         file_name = self.get_state_filename(hof_savefile)
-        state = self.load_state(file_name)
-        if state is not None:  # loaded state from file
+        state = None  # self.load_state(file_name)
+        if state is not None:  # loaded state from file TODO - change back
             # saved generation has been completed, start with the next one
             self.current_generation += 1
             print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.population_structures.population), len(self.hof),

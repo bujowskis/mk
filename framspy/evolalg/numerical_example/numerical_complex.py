@@ -28,9 +28,11 @@ class ExperimentNumericalComplex(ExperimentABC):
     def cross_over(self, gen1, gen2):
         if len(gen1) == 1:
             return gen1 if self.benchmark_function(gen1) > self.benchmark_function(gen2) else gen2
-        division_point = np.random.randint(1, len(gen1))  # ensure at least 1 point from each
+        division_point = len(gen1) // 2  # np.random.randint(1, len(gen1)-1)  # ensure at least 1 point from each
         # todo - remove assert
-        output = gen1[:division_point] + gen2[division_point:] if random.getrandbits(1) == 0 else gen2[:division_point] + gen1[division_point:]
+        output = list(gen1[:division_point]) + list(gen2[division_point:]) if random.getrandbits(1) == 0 else \
+            list(gen2[:division_point]) + list(gen1[division_point:])
+
         assert len(output) == len(gen1)
         return output
 

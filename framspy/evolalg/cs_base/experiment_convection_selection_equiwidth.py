@@ -39,6 +39,7 @@ class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
         cutting_points_values = [lower_bound + x*population_width for x in range(1, self.number_of_populations)]  # todo - check for case with 1 pop
         cutting_points_values.append(upper_bound)  # fixme - not needed, if handled properly
 
+        # note - python_intervals package?
         # todo - needs optimization, multiple approaches possible
         # fixme - implement, such that it handles [] populations correctly
         subpopulation_index = 0

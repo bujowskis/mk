@@ -8,14 +8,18 @@ from ..base.experiment_abc import ExperimentABC
 
 
 class ExperimentConvectionSelection(ExperimentABC, ABC):
+    """
+    Base Convection Selection with fixed-number migration
+    """
     # parameters
     number_of_populations: int  # = 5
     popsize: int  # = 100
-    migration_interval: int  # = 10  # fixme - migration type instead?
+    migration_interval: int  # = 10
     # internal members
     populations: List[PopulationStructures] = []  # = []
 
     def __init__(self, popsize, hof_size, number_of_populations, migration_interval, save_only_best) -> None:
+        # todo - input validation
         super().__init__(
             popsize=popsize,
             hof_size=hof_size,
@@ -25,13 +29,13 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         self.migration_interval = migration_interval
 
     def migrate_populations(self):
-        print("Performing base migration")
+        """
+        Equinumber migration - all populations with the same no. of individuals
+        """
         pool_of_all_individuals = []
         for p in self.populations:
             pool_of_all_individuals.extend(p.population)
-        print(f"Pool of individuals: {len(pool_of_all_individuals)}")
-        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.rawfitness)
-        print(f"Best indiviudal for new islands:")
+        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.rawfitness)  # fixme - handle max/min/sorted within Individual's magic methods
         for i in range(self.number_of_populations):
             shift = i*self.popsize
             self.populations[i].population = sorted_individuals[shift:shift+self.popsize]

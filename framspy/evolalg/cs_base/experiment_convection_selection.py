@@ -32,6 +32,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         """
         Equinumber migration - all populations with the same no. of individuals
         """
+        # todo - test, make sure it's proper equiwidth migration
         pool_of_all_individuals = []
         for p in self.populations:
             pool_of_all_individuals.extend(p.population)

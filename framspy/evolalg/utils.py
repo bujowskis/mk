@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 
 
 def ensureDir(string):
@@ -7,6 +8,7 @@ def ensureDir(string):
         return string
     else:
         raise NotADirectoryError(string)
+
 
 def merge_two_parsers(p1,p2):
     """
@@ -54,3 +56,61 @@ def merge_two_parsers(p1,p2):
         except:
             print("Warning:",action.option_strings, "is a duplicate" )
     return p1
+
+
+def get_state_filename(save_file_name: str) -> str:
+    """
+    :return: evolution save filename according to the used convention, None if the input parameter is None
+    """
+    return None if save_file_name is None else save_file_name + '_state.pkl'
+
+
+def get_state_from_state_file(state_filename: str):
+    """
+    Gets evolution state from saved state file
+
+    :param state_filename: name of the file storing the saved evolution state
+    :return: state object of the saved evolution, None otherwise
+    """
+    if state_filename is None:
+        return None
+    try:
+        with open(state_filename, 'rb') as f:
+            state = pickle.load(f)
+    except FileNotFoundError:
+        return None
+
+    return state
+
+
+def get_evolution_from_state_file(hof_savefile: str):
+    """
+    Gets evolution state from the respective savefile, according to the followed convention of naming state savefiles
+
+    :param hof_savefile: filename, which will be converted according to the followed convention to look for respective
+    evolution state file
+    :return: evolution state object if save file found, None otherwise
+    """
+    state_filename = get_state_filename(hof_savefile)
+    return get_state_from_state_file(state_filename)
+
+
+def write_state_to_file(state, state_filename: str):
+    """
+    Writes the state to the respective state file
+
+    :param state: state object
+    :param state_filename: name of the file to write to
+    """
+    state_filename_tmp = f'{state_filename}.tmp'
+    try:
+        with open(state_filename_tmp, "wb") as f:
+            pickle.dump(state, f)
+        # ensures the new file was first saved OK (e.g. enough free space on device), then replace
+        os.replace(state_filename_tmp, state_filename)
+    except Exception as ex:
+        raise RuntimeError(
+            f"Exception: Failed to save evolution state {state_filename_tmp}\n"
+            f"Message: {ex}\n"
+            f"This does not prevent the experiment from continuing, but let\'s stop here to fix the problem with saving state files."
+        )

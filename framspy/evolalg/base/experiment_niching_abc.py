@@ -11,6 +11,8 @@ from ..structures.individual import Individual
 from .experiment_abc import ExperimentABC
 from .remove_diagonal import remove_diagonal
 
+from ..utils import get_state_filename
+
 
 class DeapFitness(base.Fitness):
     weights = (1, 1)
@@ -148,16 +150,11 @@ class ExperimentNiching(ExperimentABC, ABC):
         out_pop = tools.selNSGA2(pop_offspring, len(population))
         return out_pop
 
-    def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
-        file_name = self.get_state_filename(hof_savefile)
-        state = self.load_state(file_name)
-        if state is not None:  # loaded state from file
-            # saved generation has been completed, start with the next one
-            self.current_generation += 1
-            print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.population_structures.population), len(self.hof),
-                                                                                                                                                 len(self.stats),  (len(self.population_structures.archive)), self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
-        else:
-            self.initialize_evolution(self.genformat, initialgenotype)
+    def evolve(
+            self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
+            try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
+    ):
+        self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
@@ -176,7 +173,7 @@ class ExperimentNiching(ExperimentABC, ABC):
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
-                self.save_state(file_name)
+                self.save_state(get_state_filename(hof_savefile))
         if hof_savefile is not None:
             self.save_genotypes(hof_savefile)
         return self.population_structures.population, self.stats

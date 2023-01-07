@@ -6,6 +6,8 @@ from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
 from ..base.experiment_abc import ExperimentABC
 
+from ..utils import get_state_filename
+
 
 class ExperimentConvectionSelection(ExperimentABC, ABC):
     """
@@ -62,18 +64,14 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         for h in sorted(hof_, key=lambda x: x.rawfitness):
             self.hof.add(h)
 
-    def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
-        file_name = self.get_state_filename(hof_savefile)
-        state = self.load_state(file_name)
-        if state is not None:  # loaded state from file
-            self.current_generation += 1  # saved generation has been completed, start with the next one
-            # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
-            print(f'...Resuming from saved state: population size = {len(self.populations[0].population)}, hof size = {len(self.hof)}, stats size = {len(self.stats)}, generation = {self.current_generation}/{generations}')
-        else:
-            self.initialize_evolution(initialgenotype)
+    def evolve(
+            self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
+            try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
+    ):
+        self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
+
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
-
             for p in self.populations:
                 p.population = self.make_new_population(p.population, pmut, pxov, tournament_size)
 
@@ -88,7 +86,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
-                self.save_state(file_name)
+                self.save_state(get_state_filename())
 
         if hof_savefile is not None:
             self.save_genotypes(hof_savefile)
@@ -99,8 +97,8 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
     def get_args_for_parser():
         parser = ExperimentABC.get_args_for_parser()
 
-        parser.add_argument("-islands",type=int, default=5,
+        parser.add_argument("-islands", type=int, default=5,
                             help="Number of subpopulations (islands)")
-        parser.add_argument("-generations_migration",type=int, default=10,
+        parser.add_argument("-generations_migration", type=int, default=10,
                             help="Number of generations separating migration events when genotypes migrate between subpopulations (islands)")
         return parser

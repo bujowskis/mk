@@ -1,0 +1,93 @@
+import numpy as np
+from intervals import closed, openclosed
+
+from experiment_convection_selection import ExperimentConvectionSelection
+from ..structures.population_methods import remove_excess_individuals_random
+
+# todo - try running in SLURM / super computers (slower than SLURM, but a workaround if sth wrong with SLURM)
+#   GECKO - numerical benchmarks (fast enough) framsticks - too slow
+#   writing the paper - the most time-consuming, but may go for CEC2004(?) benchmarks (DEAP benchmark functions?)
+
+# how to define the absolute range bounds? (min and max from pool of all individuals?)
+#   YES (current min, current max - not historical)
+
+# how to handle case with all uniform individuals?
+#   either check for this case and invoke equinumber
+#   or handled with proper implementation
+
+# how to handle case with marginal difference in min and max?
+#   (handled in the below)
+
+# how to handle case with no individuals in subpopulation?
+#   (notes: "receives from nearest low non-empty" - how exactly?)
+#   look for the bottom explanations (may use as a reference code KacperPerz/evolalg - after our implementation)
+
+
+class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
+    def mutate(self, gen1):
+        # todo - use modular
+        pass
+
+    def cross_over(self, gen1, gen2):
+        # todo - use modular
+        pass
+
+    def evaluate(self, genotype):
+        # todo - use modular
+        pass
+
+    def migrate_populations(self):
+        """
+        Equiwidth migration - populations with distribution of fixed ranges of fitness
+        """
+        # 1.0, 1.2, 1.5, 2.0, 4.0
+        # [1.0, 2.0], (2.0, 3.0]
+        # ^ if this is inclusive, the copying mechanism handles some edge cases todo - test if that's the case
+        # OR invoke equinumber in edge case max == min
+        # todo - check for case with 1 pop
+        # fixme - use the ub as next lb
+        # todo - check if works for empty subpopulation case
+
+        # get the needed information about the populations
+        pool_of_all_individuals = np.concatenate(self.populations)
+        lower_bound = min(pool_of_all_individuals, key=lambda x: x.fitness)
+        upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness)
+        population_width = (upper_bound - lower_bound) / self.number_of_populations
+
+        # create subpopulations' fitness ranges
+        population_cuts = [lower_bound + x*population_width for x in range(self.number_of_populations)]
+        population_cuts[-1] = upper_bound  # ensures no python float errors
+        subpopulations_fitness_ranges = {
+            openclosed(population_cuts[x], population_cuts[x+1]): [] for x in range(len(population_cuts))
+        }
+        subpopulations_fitness_ranges[closed(population_cuts[0], population_cuts[1])] = subpopulations_fitness_ranges.pop(openclosed(population_cuts[0], population_cuts[1]))  # includes the lower_bound individual's fitness
+
+        # place individuals in the respective subpopulations
+        for i in pool_of_all_individuals:  # fixme - needs optimization, O(n^2) for now
+            for fitness_range in subpopulations_fitness_ranges.keys():
+                if i.fitness in fitness_range:
+                    subpopulations_fitness_ranges[fitness_range].append(i)
+                    continue
+
+        # ensure all subpopulations are non-empty
+        sorted_sub_pop_ranges = sorted(subpopulations_fitness_ranges.keys())
+        for i in range(1, len(sorted_sub_pop_ranges)):  # note that the first
+            if not subpopulations_fitness_ranges[sorted_sub_pop_ranges[i]]:
+                subpopulations_fitness_ranges[sorted_sub_pop_ranges[i]] = subpopulations_fitness_ranges[sorted_sub_pop_ranges[i-1]][:]
+
+        # remove the excess individuals
+        # NOTE - removing before ensuring non-empty subpopulations would be more efficient
+        #   however, we potentially lose diversity doing this (since random removal may preserve different individuals
+        #   from population p[n-1] in p[n]
+        for sub_pop_range in sorted_sub_pop_ranges:
+            subpopulations_fitness_ranges[sub_pop_range] = remove_excess_individuals_random(
+                individuals=subpopulations_fitness_ranges[sub_pop_range],
+                population_size=self.populations[0].population_size
+            )
+
+        # fill populations with not enough individuals
+        # NOTE - seems to be handled by experiment_abc.make_new_population todo - make sure
+
+        # assign migrated subpopulations
+        for i in range(len(self.populations)):
+            self.populations[i] = subpopulations_fitness_ranges[sorted_sub_pop_ranges[i]]

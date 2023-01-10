@@ -4,31 +4,41 @@ from typing import List
 
 from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
-from .experiment_abc import ExperimentABC
+from ..base.experiment_abc import ExperimentABC
 
 from ..utils import get_state_filename
 
 
-class ExperimentIslands(ExperimentABC, ABC):
-    number_of_populations = 5
-    popsize = 100
-    populations: List[PopulationStructures] = []
-    migration_interval = 10
+class ExperimentConvectionSelection(ExperimentABC, ABC):
+    """
+    Base Convection Selection with fixed-number migration
+    """
+    # parameters
+    number_of_populations: int  # = 5
+    popsize: int  # = 100
+    migration_interval: int  # = 10
+    # internal members
+    populations: List[PopulationStructures] = []  # = []
 
     def __init__(self, popsize, hof_size, number_of_populations, migration_interval, save_only_best) -> None:
-        super().__init__(popsize=popsize, hof_size=hof_size, save_only_best=save_only_best)
-        self.number_of_populations=number_of_populations
-        self.migration_interval=migration_interval
+        # todo - input validation
+        super().__init__(
+            popsize=popsize,
+            hof_size=hof_size,
+            save_only_best=save_only_best
+        )
+        self.number_of_populations = number_of_populations
+        self.migration_interval = migration_interval
 
     def migrate_populations(self):
-        print("Performing base migration")
+        """
+        Equinumber migration - all populations with the same no. of individuals
+        """
+        # todo - test, make sure it's proper equiwidth migration
         pool_of_all_individuals = []
         for p in self.populations:
             pool_of_all_individuals.extend(p.population)
-        print(f"Pool of individuals: {len(pool_of_all_individuals)}")
-        sorted_individuals = sorted(
-            pool_of_all_individuals, key=lambda x: x.rawfitness)
-        print(f"Best indiviudal for new islands:")
+        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.rawfitness)  # fixme - handle max/min/sorted within Individual's magic methods
         for i in range(self.number_of_populations):
             shift = i*self.popsize
             self.populations[i].population = sorted_individuals[shift:shift+self.popsize]
@@ -41,9 +51,9 @@ class ExperimentIslands(ExperimentABC, ABC):
         initial_individual = Individual()
         initial_individual.set_and_evaluate(initialgenotype, self.evaluate)
         self.stats.append(initial_individual.rawfitness)
-        [self.populations.append(PopulationStructures(initial_individual=initial_individual,
-                                                      popsize=self.popsize))
-         for _ in range(self.number_of_populations)]
+        [self.populations.append(
+            PopulationStructures(initial_individual=initial_individual, popsize=self.popsize)
+        ) for _ in range(self.number_of_populations)]
 
     def get_state(self):
         return [self.time_elapsed, self.current_generation, self.populations, self.hof, self.stats]
@@ -63,8 +73,7 @@ class ExperimentIslands(ExperimentABC, ABC):
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
             for p in self.populations:
-                p.population = self.make_new_population(
-                    p.population, pmut, pxov, tournament_size)
+                p.population = self.make_new_population(p.population, pmut, pxov, tournament_size)
 
             if g % self.migration_interval == 0:
                 print("---------Start of migration-------")
@@ -77,7 +86,7 @@ class ExperimentIslands(ExperimentABC, ABC):
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
-                self.save_state(get_state_filename(hof_savefile))
+                self.save_state(get_state_filename())
 
         if hof_savefile is not None:
             self.save_genotypes(hof_savefile)

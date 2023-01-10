@@ -1,5 +1,4 @@
 import random
-
 import numpy as np
 
 from ..base.remove_diagonal import remove_diagonal
@@ -8,7 +7,7 @@ from ..base.remove_diagonal import remove_diagonal
 class PopulationStructures:
     def __init__(self,  initial_individual, archive_size=0, popsize=100) -> None:
         self.population_size = popsize
-        self.population = [initial_individual.copy()
+        self.population = [initial_individual.copy()  # todo - initialize with random individuals? mutations of initial individual?; uniform sampling for numerical benchmarks
                            for _ in range(self.population_size)]
         self.archive = []
         self.archive_size = archive_size

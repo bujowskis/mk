@@ -42,7 +42,7 @@ class ExperimentABC(ABC):
         if new_individual.fitness is not BAD_FITNESS:  # this is how we defined BAD_FITNESS in evaluate()
             ind_list.append(new_individual)
 
-    def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
+    def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):  # fixme - rename to evolve_one_step
         """'individuals' is the input population (a list of individuals).
         Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
         Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""

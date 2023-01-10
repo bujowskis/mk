@@ -144,8 +144,9 @@ class ExperimentABC(ABC):
                     f"archive size = {len(self.population_structures.archive)},"
                     f"generation = {self.current_generation}"
                 )
-        else:
-            self.initialize_evolution(initial_genotype)
+                return
+        # either do not want from saved file or no save file found
+        self.initialize_evolution(initial_genotype)
 
     def evolve(
             self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,

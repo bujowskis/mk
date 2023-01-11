@@ -62,13 +62,23 @@ class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
         }
         subpopulations_fitness_ranges[closed(population_cuts[0], population_cuts[1])] = subpopulations_fitness_ranges.pop(openclosed(population_cuts[0], population_cuts[1]))  # includes the lower_bound individual's fitness
 
+        # Code below can be optimized this way:                  
+        # having, e.g., ranges_subpopulations = {[0.1, 0.2]: 0, ..., [0.7, 0.8]: <number_of_populations>]}
+
+        # individual_groups = dict()
+        # for i in pool_of_all_individuals:
+            ## individual_groups[i] = np.where(i.fitness in ranges_subpopulations.keys(), ranges_subpopulatons.values())
+
+        # then we'd have, e.g., individual_groups = {<individual>: 0, ...}, meaning the <individual> is assigned to range group 0
+        
+        
         # place individuals in the respective subpopulations
         for i in pool_of_all_individuals:  # fixme - needs optimization, O(n^2) for now
             for fitness_range in subpopulations_fitness_ranges.keys():
                 if i.fitness in fitness_range:
                     subpopulations_fitness_ranges[fitness_range].append(i)
                     continue
-
+        
         # ensure all subpopulations are non-empty
         sorted_sub_pop_ranges = sorted(subpopulations_fitness_ranges.keys())
         for i in range(1, len(sorted_sub_pop_ranges)):  # note that the first

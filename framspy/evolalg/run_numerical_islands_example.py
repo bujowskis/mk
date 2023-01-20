@@ -1,5 +1,4 @@
-from .numerical_example.numerical_islands_example import \
-    ExperimentNumericalIslands
+from .numerical_example.numerical_islands_example import ExperimentNumericalIslands
 
 
 def main():
@@ -14,14 +13,17 @@ def main():
         popsize=parsed_args.popsize,
         migration_interval=parsed_args.generations_migration,
         number_of_populations=parsed_args.islands,
-        save_only_best=parsed_args.save_only_best)
+        save_only_best=parsed_args.save_only_best
+    )
 
-    hof, stats = experiment.evolve(hof_savefile=parsed_args.hof_savefile,
-                                   generations=parsed_args.generations,
-                                   initialgenotype=initialgenotype,
-                                   pmut=parsed_args.pmut,
-                                   pxov=parsed_args.pxov,
-                                   tournament_size=parsed_args.tournament)
+    hof, stats = experiment.evolve(
+        hof_savefile=parsed_args.hof_savefile,
+        generations=parsed_args.generations,
+        initialgenotype=initialgenotype,
+        pmut=parsed_args.pmut,
+        pxov=parsed_args.pxov,
+        tournament_size=parsed_args.tournament
+    )
     print(len(hof))
     for ind in hof:
         print(ind.genotype, ind.rawfitness)

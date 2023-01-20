@@ -1,3 +1,4 @@
+import numpy as np
 from evolalg.preliminary_experiments.cs_equinumber import ExperimentCSRun
 from cec2017.functions import f1, f4, f6, f9, f10
 
@@ -23,11 +24,17 @@ def main():
             for migration_interval in migration_interval_list:
                 for number_of_populations in number_of_populations_list:
                     # experiment setup
-
-                    with open(file=f'', mode='w') as f:
-                    initialgenotype = initialgenotype,
-
-    initialgenotype = initialgenotype,
+                    experiment = ExperimentCSRun(popsize, hof_size, number_of_populations, migration_interval, save_only_best=True, benchmark_function=fun)
+                    experiment.evolve(
+                        hof_savefile=None,
+                        generations=generations,
+                        tournament_size=tournament_size,
+                        pmut=pmut,
+                        pxov=pxov,
+                        try_from_saved_file=False,
+                        # FIXME - CEC benchmarks "breaking news" change breaks the code...
+                        initialgenotype=np.array(np.zeros(dimension))  # np.random.uniform(0,0,size=(3, dimension))
+                    )
 
 
 if __name__ == "__main__":

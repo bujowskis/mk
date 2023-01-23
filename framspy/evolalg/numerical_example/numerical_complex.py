@@ -20,7 +20,7 @@ class ExperimentNumericalComplex(ExperimentABC):
         # print(random.uniform(-5.0, 5.0) for _ in range(len(gen1)))
         # print([random.uniform(-5.0, 5.0) for _ in range(len(gen1))])
         # print(gen1)
-        output = gen1[:]
+        output = copy.deepcopy(gen1)
         output[np.random.randint(0, len(output))] += random.uniform(-5.0, 5.0)
         assert len(output) == len(gen1)
         return output

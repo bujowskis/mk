@@ -21,6 +21,7 @@ class ExperimentABC(ABC):
     stats = []
     current_generation = 0
     time_elapsed = 0
+    cli_stats = tuple()
 
     def __init__(self, popsize, hof_size, save_only_best=True) -> None:
         self.hof = HallOfFame(hof_size)
@@ -103,10 +104,12 @@ class ExperimentABC(ABC):
         best = max(all_individuals, key=lambda item: item.rawfitness)
         # instead of single best, could add all individuals in population here, but then the outcome would depend on the order of adding
         self.hof.add(best)
-        self.stats.append(
-            best.rawfitness if self.save_only_best else best)
-        print("%d\t%d\t%g\t%g" % (generation, len(
-            all_individuals), worst.rawfitness, best.rawfitness))
+        self.stats.append(best.rawfitness if self.save_only_best else best)
+        self.cli_stats = (generation, len(all_individuals), worst.rawfitness, best.rawfitness)
+        print(f"{generation}\t{len(all_individuals)}\t{worst.rawfitness}\t{best.rawfitness}")
+
+    def get_cli_stats(self):
+        return self.cli_stats
 
     def initialize_evolution(self, initialgenotype):
         self.current_generation = 0
@@ -115,8 +118,7 @@ class ExperimentABC(ABC):
         initial_individual = Individual()
         initial_individual.set_and_evaluate(initialgenotype, self.evaluate)
         self.hof.add(initial_individual)
-        self.stats.append(
-            initial_individual.rawfitness if self.save_only_best else initial_individual)
+        self.stats.append(initial_individual.rawfitness if self.save_only_best else initial_individual)
         self.population_structures = PopulationStructures(
             initial_individual=initial_individual, archive_size=0, popsize=self.popsize)
 

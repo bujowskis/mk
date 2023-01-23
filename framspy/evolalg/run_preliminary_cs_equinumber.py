@@ -9,7 +9,7 @@ def main():
     popsize = 100
     pmut = 0.7
     pxov = 0.2
-    generations = 3#100_000
+    generations = 100_000
     tournament_size = 5
     results_directory_path = 'results'
 
@@ -17,7 +17,7 @@ def main():
     migration_interval_list = [10]
     number_of_populations_list = [5]
 
-    dimensions = [20, 10, 20, 30, 50, 100]
+    dimensions = [2, 10, 20, 30, 50, 100]
     functions = [f1, f4, f6, f9, f10]
 
     for fun in functions:
@@ -38,9 +38,6 @@ def main():
                         try_from_saved_file=False,
                         initialgenotype=np.zeros(dimension)  # np.random.uniform(0,0,size=(3, dimension))
                     )
-                    break
-                break
-            break
         break
 
 

@@ -6,7 +6,8 @@ from cec2017.functions import f1, f4, f6, f9, f10
 def main():
     # fixed parameters
     hof_size = 10
-    popsize = 100
+    popsize = 100  # todo - probably interested in the configuration
+    # FIXME - greater number of individuals in each run?? (+500)
     pmut = 0.7
     pxov = 0.2
     generations = 100_000

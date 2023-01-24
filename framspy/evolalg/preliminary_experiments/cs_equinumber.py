@@ -34,7 +34,7 @@ class ExperimentCSRun(ExperimentConvectionSelection):
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2][0], cli_stats[3][0]]
 
-        df.to_csv(f'{self.results_directory_path}/cs_equinumber-{self.benchmark_function.__name__}-{len(initialgenotype)}.csv')
+        df.to_csv(f'{self.results_directory_path}/cs_equinumber-{self.benchmark_function.__name__}-{len(initialgenotype)}-{self.migration_interval}-{len(self.populations)}.csv')
 
         return self.hof, self.stats
 

@@ -1,6 +1,7 @@
 import time
 from abc import ABC
 from typing import List
+from numpy import inf
 
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 
@@ -9,7 +10,7 @@ from ..utils import get_state_filename
 
 class ExperimentHFC(ExperimentConvectionSelection, ABC):
     admission_buffers: List[List]
-    admission_thresholds: List
+    admission_thresholds: List[float]
 
     """
     Implementation of synchronous HFC, tailored to be comparable with CS
@@ -23,23 +24,39 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
             migration_interval=migration_interval,
             save_only_best=save_only_best
         )
-        self.admission_buffers = [[] for _ in range(len(self.populations))]
-        self.admission_thresholds = [None for _ in range(len(self.populations))]
+        self.admission_buffers = [[] for _ in range(self.number_of_populations)]
+        self.admission_thresholds = [-inf for _ in range(self.number_of_populations)]
 
     def migrate_populations(self):
         """
         HFC "only up" admission threshold migration
         """
-        # admission_buffers = [[] for i in range(len(self.populations))]
-        # admission_thresholds
-        # todo
-        ...
+        self.recalculate_admission_thresholds()
+
+        # remove / move to admission buffers
+        for pop_idx in range(self.number_of_populations):
+            for individual in self.populations[pop_idx].population:
+                if individual.fitness < self.admission_thresholds[pop_idx]:  # fitness so bad individual doesn't belong
+                    self.populations[pop_idx].population.remove(individual)
+                    break
+                for admission_threshold_idx in reversed(range(pop_idx+1, self.number_of_populations)):
+                    if individual.fitness >= self.admission_thresholds[admission_threshold_idx]:
+                        self.admission_buffers[admission_threshold_idx].append(individual)
+                        self.populations[pop_idx].population.remove(individual)
+                        break
+
+        # handle admission buffers
+        for pop_idx in range(self.number_of_populations):
+            self.admission_buffers[pop_idx] = sorted(self.admission_buffers[pop_idx], key=lambda i: i.fitness, reverse=True)[:self.populations[pop_idx].population_size//2]
+            self.populations[pop_idx].population.extend(self.admission_buffers[pop_idx])
+            self.populations[pop_idx].population = sorted(self.populations[pop_idx].population, key=lambda i: i.fitness, reverse=True)[:self.populations[pop_idx].population_size]
 
     def recalculate_admission_thresholds(self):
         """
         Called after evolve(), works on initialized admission thresholds
         Recalculates the admission thresholds according to equiwidth scheme, leaving entry and avg threshold untouched
         """
+        # FIXME - potential problem of widen range
         pool_of_all_individuals = []
         [pool_of_all_individuals.extend(p.population) for p in self.populations]
         lower_bound: float = self.admission_thresholds[1]
@@ -60,14 +77,14 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         [pool_of_all_individuals.extend(p.population) for p in self.populations]
         avg_random_fitness = sum([individual.fitness for individual in pool_of_all_individuals])/len(pool_of_all_individuals)
         self.admission_thresholds[0], self.admission_thresholds[1] = None, avg_random_fitness
-        # admission thresholds based on equiwidth
+        # admission thresholds based on equiwidth  # FIXME - potential problem of widen range
         lower_bound = avg_random_fitness  # it makes no sense to go below average fitness of random individual
         upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness)
         population_width = (upper_bound - lower_bound) / self.number_of_populations - 2  # account for entry and first subpop
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i-1)*population_width
         # at this point, the admission thresholds are the following:
-        # None, avg, avg + 1*population_width, avg + 2*population_width, ..., avg + (number_of_populations-1)*population_width
+        # None, avg, avg + 1*pop_width, avg + 2*pop_width, ..., avg + (number_of_populations-1)*pop_width
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):

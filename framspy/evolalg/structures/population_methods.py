@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from typing import List
 
 from population import PopulationStructures
@@ -21,3 +22,12 @@ def remove_excess_individuals_random(individuals: List[Individual], population_s
 # todo (future) - more elegant implementation of keeping the desired no. of individuals within the subpopulations
 
 # def fill_population_random_copy(population: PopulationStructures) -> Li
+
+
+def fill_population_with_random_numerical(
+        population: PopulationStructures, dimensions: int, upper_bound: float = -100, lower_bound: float = 100,
+) -> PopulationStructures:
+    """
+    Fills the population with random individuals, sampled uniformly from lower to upper bound, within the given dimensions
+    """
+    pass

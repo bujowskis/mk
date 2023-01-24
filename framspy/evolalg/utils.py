@@ -19,8 +19,7 @@ def merge_two_parsers(p1,p2):
     title_group_map = {}
     for group in p1._action_groups:
         if group.title in title_group_map:
-            msg = ('cannot merge actions - two groups are named %r')
-            raise ValueError(msg % (group.title))
+            raise ValueError(f'cannot merge actions - two groups are named {group.title}')
         title_group_map[group.title] = group
 
     # map each action to its group
@@ -54,7 +53,7 @@ def merge_two_parsers(p1,p2):
         try:
             group_map.get(action, p1)._add_action(action)
         except:
-            print("Warning:",action.option_strings, "is a duplicate" )
+            print("Warning:", action.option_strings, "is a duplicate" )
     return p1
 
 

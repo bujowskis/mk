@@ -1,7 +1,7 @@
 import time
 from abc import ABC
 from typing import List
-from numpy import inf
+from numpy import inf, std
 
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 
@@ -71,20 +71,20 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
 
-        # CALIBRATION STAGE
-        # admission thresholds based on HFC
+        # CALIBRATION STAGE - HFC-ADM
         pool_of_all_individuals = []
         [pool_of_all_individuals.extend(p.population) for p in self.populations]
-        avg_random_fitness = sum([individual.fitness for individual in pool_of_all_individuals])/len(pool_of_all_individuals)
-        self.admission_thresholds[0], self.admission_thresholds[1] = None, avg_random_fitness
-        # admission thresholds based on equiwidth  # FIXME - potential problem of widen range
-        lower_bound = avg_random_fitness  # it makes no sense to go below average fitness of random individual
-        upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness)
-        population_width = (upper_bound - lower_bound) / self.number_of_populations - 2  # account for entry and first subpop
+
+        fitnesses_of_individuals = [individual.fitness for individual in pool_of_all_individuals]
+        avg_random_fitness = sum(fitnesses_of_individuals)/len(pool_of_all_individuals)
+        self.admission_thresholds[0], self.admission_thresholds[1] = -inf, avg_random_fitness
+        self.admission_thresholds[-1] = max(fitnesses_of_individuals) - std(fitnesses_of_individuals)
+
+        lower_bound = avg_random_fitness
+        upper_bound = self.admission_thresholds[-1]
+        population_width = (upper_bound - lower_bound) / self.number_of_populations - 2 
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i-1)*population_width
-        # at this point, the admission thresholds are the following:
-        # None, avg, avg + 1*pop_width, avg + 2*pop_width, ..., avg + (number_of_populations-1)*pop_width
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):

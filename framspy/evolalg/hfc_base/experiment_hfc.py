@@ -38,6 +38,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
             for individual in self.populations[pop_idx].population:
                 if individual.fitness < self.admission_thresholds[pop_idx]:  # fitness so bad individual doesn't belong
                     self.populations[pop_idx].population.remove(individual)
+                    self.populations[0].population.append(individual) # FIXME
                     break
                 for admission_threshold_idx in reversed(range(pop_idx+1, self.number_of_populations)):
                     if individual.fitness >= self.admission_thresholds[admission_threshold_idx]:
@@ -56,14 +57,36 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         Called after evolve(), works on initialized admission thresholds
         Recalculates the admission thresholds according to equiwidth scheme, leaving entry and avg threshold untouched
         """
-        # FIXME - potential problem of widen range
         pool_of_all_individuals = []
         [pool_of_all_individuals.extend(p.population) for p in self.populations]
-        lower_bound: float = self.admission_thresholds[1]
-        upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness)
+        fitnesses_of_individuals = [individual.fitness for individual in pool_of_all_individuals]
+        # EXAMPLE - Passing parameters for HFC-ADM
+        lower_bound, upper_bound = self.get_bounds(pool_of_all_individuals, fitnesses_of_individuals, 
+                                                    set_worst_to_fixed=True, set_best_to_stdev=True)
+        # lower_bound = self.admission_thresholds[1]
+        # upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness)
         population_width = (upper_bound - lower_bound) / self.number_of_populations - 2
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i - 1) * population_width
+
+    def get_bounds(pool_of_all_individuals, fitnesses_of_individuals, set_worst_to_fixed: bool, set_best_to_stdev: bool):
+        # HFC-ADM approach
+        if set_worst_to_fixed and set_best_to_stdev:
+            avg_random_fitness = sum(fitnesses_of_individuals)/len(pool_of_all_individuals)
+            lower_bound = avg_random_fitness
+            upper_bound = max(fitnesses_of_individuals) - std(fitnesses_of_individuals)
+        # Equiwidth approach
+        elif not set_worst_to_fixed and not set_best_to_stdev:
+            lower_bound = min(fitnesses_of_individuals)
+            upper_bound = max(fitnesses_of_individuals)
+        # Something in between HFC-ADM and Equiwidth approaches
+        elif set_worst_to_fixed and not set_best_to_stdev:
+            lower_bound = min(fitnesses_of_individuals)
+            upper_bound = max(fitnesses_of_individuals) - std(fitnesses_of_individuals)
+        else:
+            raise Exception('not implemented')
+
+        return lower_bound, upper_bound
 
     def evolve(
             self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
@@ -71,16 +94,15 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
 
-        # CALIBRATION STAGE - HFC-ADM
+        # CALIBRATION STAGE
         pool_of_all_individuals = []
         [pool_of_all_individuals.extend(p.population) for p in self.populations]
-
         fitnesses_of_individuals = [individual.fitness for individual in pool_of_all_individuals]
-        avg_random_fitness = sum(fitnesses_of_individuals)/len(pool_of_all_individuals)
-        self.admission_thresholds[0], self.admission_thresholds[1] = -inf, avg_random_fitness
-        self.admission_thresholds[-1] = max(fitnesses_of_individuals) - std(fitnesses_of_individuals)
-
-        lower_bound = avg_random_fitness
+        self.admission_thresholds[0] = -inf
+        # EXAMPLE - Passing parameters for HFC-ADM
+        self.admission_thresholds[1], self.admission_thresholds[-1] = self.get_bounds(pool_of_all_individuals, fitnesses_of_individuals,
+                                                                                        set_worst_to_fixed=True, set_best_to_stdev=True)
+        lower_bound = self.admission_thresholds[1]
         upper_bound = self.admission_thresholds[-1]
         population_width = (upper_bound - lower_bound) / self.number_of_populations - 2 
         for i in range(2, self.number_of_populations):

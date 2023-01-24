@@ -29,11 +29,9 @@ class PopulationStructures:
             self.population_size, len(dissim_matrix))]
         for i in range(self.population_size):
             current_archive_ind = current_archive_ind + [i]
-            temp_dissim_matrix = dissim_matrix[current_archive_ind,
-                                               ][:, current_archive_ind]
+            temp_dissim_matrix = dissim_matrix[current_archive_ind,][:, current_archive_ind]
             if len(current_archive_ind) > self.archive_size:
                 to_remove = self.change_individual(temp_dissim_matrix)
                 current_archive_ind.pop(to_remove)
 
-        self.archive = np.array(population_archive)[
-            current_archive_ind].tolist()
+        self.archive = np.array(population_archive)[current_archive_ind].tolist()

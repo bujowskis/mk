@@ -30,13 +30,10 @@ class ExperimentFramsNiching(ExperimentFrams, ExperimentNiching):
         self.time_elapsed = 0
         self.stats = []  # stores the best individuals, one from each generation
         initial_individual = Individual()
-        initial_individual.set_and_evaluate(self.frams_getsimplest(
-            '1' if genformat is None else genformat, initialgenotype), self.evaluate)
+        initial_individual.set_and_evaluate(self.frams_getsimplest('1' if genformat is None else genformat, initialgenotype), self.evaluate)
         self.hof.add(initial_individual)
-        self.stats.append(
-            initial_individual.rawfitness if self.save_only_best else initial_individual)
-        self.population_structures = PopulationStructures(
-            initial_individual=initial_individual, archive_size=self.archive_size, popsize=self.popsize)
+        self.stats.append(initial_individual.rawfitness if self.save_only_best else initial_individual)
+        self.population_structures = PopulationStructures(initial_individual=initial_individual, archive_size=self.archive_size, popsize=self.popsize)
         if self.fit == "nsga2":
             self.do_nsga2_dissim(self.population_structures.population)
         if self.fit == "nslc":

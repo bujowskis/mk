@@ -4,6 +4,7 @@ import random
 import copy
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical
+from evolalg.mutation import simple_numerical_mutation
 
 class ExperimentNumericalCSRun(ExperimentConvectionSelection):
     def __init__(
@@ -21,7 +22,7 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
         function_bound = 100**self.dimensions
-        self.reinitialize_population_with_random_numerical(self.population_structures, self.dimensions, upper_bound=function_bound, lower_bound=-function_bound)
+        reinitialize_population_with_random_numerical(self.population_structures, self.dimensions, upper_bound=function_bound, lower_bound=-function_bound)
 
         df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
 
@@ -53,6 +54,4 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
         return self.benchmark_function(cec2017_genotype)
 
     def mutate(self, gen1):
-        output = copy.deepcopy(gen1)
-        output[np.random.randint(len(output))] += random.uniform(-5.0, 5.0)
-        return output
+        return simple_numerical_mutation(gen1)

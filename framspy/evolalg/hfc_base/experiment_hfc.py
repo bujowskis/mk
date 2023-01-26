@@ -4,7 +4,6 @@ from typing import List
 from numpy import inf, std
 
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
-from evolalg.structures.population_methods import fill_population_with_random_numerical
 
 from evolalg.utils import get_state_filename
 
@@ -56,7 +55,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
     @abstractmethod
     def add_to_worst(self):
         """
-        Adds
+        Handles adding new random individuals to the worst subpopulation
         """
         pass
 
@@ -69,8 +68,10 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         [pool_of_all_individuals.extend(p.population) for p in self.populations]
         fitnesses_of_individuals = [individual.fitness for individual in pool_of_all_individuals]
         # EXAMPLE - Passing parameters for HFC-ADM
-        lower_bound, upper_bound = self.get_bounds(pool_of_all_individuals, fitnesses_of_individuals, 
-                                                    set_worst_to_fixed=True, set_best_to_stdev=True)
+        lower_bound, upper_bound = self.get_bounds(
+            pool_of_all_individuals, fitnesses_of_individuals,
+            set_worst_to_fixed=True, set_best_to_stdev=True
+        )
         population_width = (upper_bound - lower_bound) / self.number_of_populations - 2
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i - 1) * population_width
@@ -106,8 +107,10 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         fitnesses_of_individuals = [individual.fitness for individual in pool_of_all_individuals]
         self.admission_thresholds[0] = -inf
         # EXAMPLE - Passing parameters for HFC-ADM
-        self.admission_thresholds[1], self.admission_thresholds[-1] = self.get_bounds(pool_of_all_individuals, fitnesses_of_individuals,
-                                                                                        set_worst_to_fixed=True, set_best_to_stdev=True)
+        self.admission_thresholds[1], self.admission_thresholds[-1] = self.get_bounds(
+            pool_of_all_individuals, fitnesses_of_individuals,
+            set_worst_to_fixed=True, set_best_to_stdev=True
+        )
         lower_bound = self.admission_thresholds[1]
         upper_bound = self.admission_thresholds[-1]
         population_width = (upper_bound - lower_bound) / self.number_of_populations - 2 

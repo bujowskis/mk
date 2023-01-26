@@ -21,6 +21,10 @@ def main():
     dimensions = [2, 10, 20, 30, 50, 100]
     functions = [f1, f4, f6, f9, f10]
 
+    # Seeds for multiple runs with reproducible results
+    # FIXME - incorporate seeds
+    seeds = [seed for seed in range(10)]
+
     for fun in functions:
         for dimension in dimensions:
             for migration_interval in migration_interval_list:
@@ -39,6 +43,7 @@ def main():
                         try_from_saved_file=False,
                         initialgenotype=np.zeros(dimension)  # np.random.uniform(0,0,size=(3, dimension))
                     )
+                    # FIXME - export result df here (then we know all the params)
         break
 
 

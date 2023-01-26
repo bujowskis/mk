@@ -38,8 +38,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         pool_of_all_individuals = []
         for p in self.populations:
             pool_of_all_individuals.extend(p.population)
-        # fixme - should it be x.fitness instead of raw?
-        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.rawfitness)  # fixme - handle max/min/sorted within Individual's magic methods
+        sorted_individuals = sorted(pool_of_all_individuals, key=lambda x: x.fitness)  # fixme - handle max/min/sorted within Individual's magic methods
         for i in range(self.number_of_populations):
             shift = i*self.popsize
             self.populations[i].population = sorted_individuals[shift:shift+self.popsize]

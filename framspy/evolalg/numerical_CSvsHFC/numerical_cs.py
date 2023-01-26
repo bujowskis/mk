@@ -1,17 +1,17 @@
 from pandas import DataFrame, Series
 import numpy as np
-import random
-import copy
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical
 from evolalg.mutation import simple_numerical_mutation
+from evolalg.crossover import simple_numerical_crossover
+
 
 class ExperimentNumericalCSRun(ExperimentConvectionSelection):
     def __init__(
             self, popsize, hof_size, number_of_populations, migration_interval, save_only_best,
             benchmark_function, results_directory_path, dimensions
     ):
-        super().__init__(popsize, hof_size, number_of_populations, migration_interval, save_only_best, dimensions)
+        super().__init__(popsize, hof_size, number_of_populations, migration_interval, save_only_best)
         self.benchmark_function = benchmark_function
         self.results_directory_path = results_directory_path
         self.dimensions = dimensions
@@ -21,8 +21,8 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
             try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
-        function_bound = 100**self.dimensions
-        reinitialize_population_with_random_numerical(self.population_structures, self.dimensions, upper_bound=function_bound, lower_bound=-function_bound)
+        for pop_idx in range(len(self.populations)):
+            self.populations[pop_idx] = reinitialize_population_with_random_numerical(self.populations[pop_idx], self.dimensions)
 
         df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
 
@@ -39,17 +39,14 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2][0], cli_stats[3][0]]
 
-        df.to_csv(f'{self.results_directory_path}/numerical_cs-{self.benchmark_function.__name__}-{len(initialgenotype)}-{self.migration_interval}-{len(self.populations)}.csv')
-
         return self.hof, self.stats, df
 
     def cross_over(self, gen1, gen2):
-        division_point = len(gen1) // 2
-        output = list(gen1[:division_point]) + list(gen2[division_point:]) if random.getrandbits(1) == 0 else \
-            list(gen2[:division_point]) + list(gen1[division_point:])
-        return output
+        return simple_numerical_crossover(gen1, gen2)
 
     def evaluate(self, genotype):
+        if any(x < -100 or x > 100 for x in genotype):
+            return -np.inf
         cec2017_genotype = np.array([genotype])
         return self.benchmark_function(cec2017_genotype)
 

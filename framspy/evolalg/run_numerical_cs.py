@@ -1,5 +1,5 @@
 import numpy as np
-from evolalg.preliminary_experiments.cs_equinumber import ExperimentCSRun
+from evolalg.numerical_CSvsHFC.numerical_cs import ExperimentNumericalCSRun
 from cec2017.functions import f1, f4, f6, f9, f10
 
 
@@ -30,9 +30,10 @@ def main():
             for migration_interval in migration_interval_list:
                 for number_of_populations in number_of_populations_list:
                     # experiment setup
-                    experiment = ExperimentCSRun(
+                    experiment = ExperimentNumericalCSRun(
                         popsize, hof_size, number_of_populations, migration_interval,
-                        save_only_best=True, benchmark_function=fun, results_directory_path=results_directory_path
+                        save_only_best=True, benchmark_function=fun, results_directory_path=results_directory_path,
+                        dimensions=dimension
                     )
                     experiment.evolve(
                         hof_savefile=None,
@@ -41,7 +42,8 @@ def main():
                         pmut=pmut,
                         pxov=pxov,
                         try_from_saved_file=False,
-                        initialgenotype=np.zeros(dimension)  # np.random.uniform(0,0,size=(3, dimension))
+                        initialgenotype=np.zeros(dimension), # np.random.uniform(0,0,size=(3, dimension))
+                        dimensions=dimension
                     )
                     # FIXME - export result df here (then we know all the params)
         break

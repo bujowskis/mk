@@ -32,3 +32,15 @@ def fill_population_with_random_numerical(
         population.population.extend([[random.uniform(lower_bound, upper_bound) for _ in range(dimensions)] for _ in range(difference_from_target_size)])
     
     return population
+
+
+def reinitialize_population_with_random_numerical(
+        population: PopulationStructures, dimensions: int, upper_bound: float = -100, lower_bound: float = 100
+) -> PopulationStructures:
+    """
+    Wipes the current population's individuals and fills it with randomly sampled numerical ones
+    """
+    population.population = []
+    population = fill_population_with_random_numerical(population, dimensions, upper_bound, lower_bound)
+
+    return population

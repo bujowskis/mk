@@ -19,7 +19,7 @@ def main():
     number_of_populations_list = [5]
 
     dimensions = [2, 10, 20, 30, 50, 100]
-    functions = [f1, f4, f6, f9, f10]
+    functions = [(f1, 100), (f4, 300), (f6, 500), (f9, 800), (f10, 900)]
 
     for fun in functions:
         for dimension in dimensions:

@@ -1,11 +1,12 @@
 import time
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import List
 from numpy import inf, std
 
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
+from evolalg.structures.population_methods import fill_population_with_random_numerical
 
-from ..utils import get_state_filename
+from evolalg.utils import get_state_filename
 
 
 class ExperimentHFC(ExperimentConvectionSelection, ABC):
@@ -36,10 +37,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         # remove / move to admission buffers
         for pop_idx in range(self.number_of_populations):
             for individual in self.populations[pop_idx].population:
-                if individual.fitness < self.admission_thresholds[pop_idx]:  # fitness so bad individual doesn't belong
-                    self.populations[pop_idx].population.remove(individual)
-                    self.populations[0].population.append(individual) # FIXME
-                    break
+                # we don't explicitly remove "broken" individuals from their population
                 for admission_threshold_idx in reversed(range(pop_idx+1, self.number_of_populations)):
                     if individual.fitness >= self.admission_thresholds[admission_threshold_idx]:
                         self.admission_buffers[admission_threshold_idx].append(individual)
@@ -51,6 +49,16 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
             self.admission_buffers[pop_idx] = sorted(self.admission_buffers[pop_idx], key=lambda i: i.fitness, reverse=True)[:self.populations[pop_idx].population_size//2]
             self.populations[pop_idx].population.extend(self.admission_buffers[pop_idx])
             self.populations[pop_idx].population = sorted(self.populations[pop_idx].population, key=lambda i: i.fitness, reverse=True)[:self.populations[pop_idx].population_size]
+
+        # add random individuals to the worst subpopulation
+        self.add_to_worst()
+
+    @abstractmethod
+    def add_to_worst(self):
+        """
+        Adds
+        """
+        pass
 
     def recalculate_admission_thresholds(self):
         """

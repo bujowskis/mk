@@ -9,9 +9,6 @@ from evolalg.utils import get_state_filename
 
 
 class ExperimentHFC(ExperimentConvectionSelection, ABC):
-    admission_buffers: List[List]
-    admission_thresholds: List[float]
-
     """
     Implementation of synchronous HFC, tailored to be comparable with CS
     """
@@ -24,8 +21,8 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
             migration_interval=migration_interval,
             save_only_best=save_only_best
         )
-        self.admission_buffers = [[] for _ in range(self.number_of_populations)]
-        self.admission_thresholds = [-inf for _ in range(self.number_of_populations)]
+        self.admission_buffers: List[List] = [[] for _ in range(self.number_of_populations)]
+        self.admission_thresholds: List[float] = [-inf for _ in range(self.number_of_populations)]
 
     def migrate_populations(self):
         """

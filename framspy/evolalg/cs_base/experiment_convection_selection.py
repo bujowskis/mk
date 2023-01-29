@@ -13,14 +13,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
     """
     Base Convection Selection with fixed-number migration
     """
-    # parameters
-    number_of_populations: int  # = 5
-    popsize: int  # = 100
-    migration_interval: int  # = 10
-    # internal members
-    populations: List[PopulationStructures] = []  # = []
-
-    def __init__(self, popsize, hof_size, number_of_populations, migration_interval, save_only_best) -> None:
+    def __init__(self, popsize, hof_size, number_of_populations: int, migration_interval: int, save_only_best) -> None:
         # todo - input validation
         super().__init__(
             popsize=popsize,
@@ -29,6 +22,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         )
         self.number_of_populations = number_of_populations
         self.migration_interval = migration_interval
+        self.populations: List[PopulationStructures] = []
 
     def migrate_populations(self):
         """

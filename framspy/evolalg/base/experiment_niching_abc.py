@@ -11,8 +11,6 @@ from ..structures.individual import Individual
 from .experiment_abc import ExperimentABC
 from .remove_diagonal import remove_diagonal
 
-from ..utils import get_state_filename
-
 
 class DeapFitness(base.Fitness):
     weights = (1, 1)
@@ -29,9 +27,9 @@ class ExperimentNiching(ExperimentABC, ABC):
     def __init__(self, fit, normalize, popsize, hof_size, save_only_best=True, knn_niching=5, knn_nslc=10, archive_size=0) -> None:
         ExperimentABC.__init__(self,popsize=popsize, hof_size=hof_size, save_only_best=save_only_best)
         self.fit = fit
+        self.normalize = normalize
         self.knn_niching = knn_niching
         self.knn_nslc = knn_nslc
-        self.normalize = normalize
         self.archive_size=archive_size
         if popsize < self.knn_niching:
             self.knn_niching = popsize - 2
@@ -73,7 +71,7 @@ class ExperimentNiching(ExperimentABC, ABC):
                 i.fitness = d
         else:
             raise Exception("Wrong fit type: ", self.fit,
-                            f" chose correct one or implement new behaviour")
+                            f" chose correct one or implement new behavior")
         population_structures.update_archive(dissim_matrix, population_archive)
 
     def do_nsga2_dissim(self, population):
@@ -99,21 +97,21 @@ class ExperimentNiching(ExperimentABC, ABC):
                 tuple((dissim_value, temp_ind_fit)))
 
     def make_new_population_nsga2(self, population, prob_mut, prob_xov):
-        N = len(population)
-        expected_mut = int(N * prob_mut)
-        expected_xov = int(N * prob_xov)
+        expected_mut = int(self.popsize * prob_mut)
+        expected_xov = int(self.popsize * prob_xov)
+        assert expected_mut + expected_xov <= self.popsize, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
         assignCrowdingDist(population)
-        offspring = tools.selTournamentDCD(population, N)
+        offspring = tools.selTournamentDCD(population, self.popsize)
 
         def addGenotypeIfValid(ind_list, genotype):
             new_individual = Individual()
             new_individual.set_and_evaluate(genotype, self.evaluate)
-            if new_individual.fitness is not BAD_FITNESS:  # this is how we defined BAD_FITNESS in frams_evaluate()
+            if new_individual.fitness is not BAD_FITNESS:
                 ind_list.append(new_individual)
 
         counter = 0
 
-        def get_indyvidual(pop, c):
+        def get_individual(pop, c):
             if c < len(pop):
                 ind = pop[c]
                 c += 1
@@ -126,19 +124,18 @@ class ExperimentNiching(ExperimentABC, ABC):
 
         newpop = []
         while len(newpop) < expected_mut:
-            ind, counter = get_indyvidual(offspring, counter)
+            ind, counter = get_individual(offspring, counter)
             addGenotypeIfValid(newpop, self.mutate(ind.genotype))
 
         # adding valid crossovers of selected individuals...
         while len(newpop) < expected_mut + expected_xov:
-            ind1, counter = get_indyvidual(offspring, counter)
-            ind2, counter = get_indyvidual(offspring, counter)
-            addGenotypeIfValid(newpop, self.cross_over(
-                ind1.genotype, ind2.genotype))
+            ind1, counter = get_individual(offspring, counter)
+            ind2, counter = get_individual(offspring, counter)
+            addGenotypeIfValid(newpop, self.cross_over(ind1.genotype, ind2.genotype))
 
         # select clones to fill up the new population until we reach the same size as the input population
         while len(newpop) < len(population):
-            ind, counter = get_indyvidual(offspring, counter)
+            ind, counter = get_individual(offspring, counter)
             newpop.append(Individual().copyFrom(ind))
 
         pop_offspring = population+newpop
@@ -150,11 +147,16 @@ class ExperimentNiching(ExperimentABC, ABC):
         out_pop = tools.selNSGA2(pop_offspring, len(population))
         return out_pop
 
-    def evolve(
-            self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
-            try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
-    ):
-        self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
+    def evolve(self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size):
+        file_name = self.get_state_filename(hof_savefile)
+        state = self.load_state(file_name)
+        if state is not None:  # loaded state from file
+            # saved generation has been completed, start with the next one
+            self.current_generation += 1
+            print("...Resuming from saved state: population size = %d, hof size = %d, stats size = %d, archive size = %d, generation = %d/%d" % (len(self.population_structures.population), len(self.hof),
+                                                                                                                                                 len(self.stats),  (len(self.population_structures.archive)), self.current_generation, generations))  # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
+        else:
+            self.initialize_evolution(self.genformat, initialgenotype)
 
         time0 = time.process_time()
         for g in range(self.current_generation, generations):
@@ -173,7 +175,7 @@ class ExperimentNiching(ExperimentABC, ABC):
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
-                self.save_state(get_state_filename(hof_savefile))
+                self.save_state(file_name)
         if hof_savefile is not None:
             self.save_genotypes(hof_savefile)
         return self.population_structures.population, self.stats
@@ -190,7 +192,7 @@ class ExperimentNiching(ExperimentABC, ABC):
         parser.add_argument("-normalize",type= str, default= "max",
                             help="What normalization use for dissimilarity matrix, max (default}, sum and none")
         parser.add_argument("-knn",type= int, default= 0,
-                        help="Nearest neighbours parameter for local novelty/niching, if knn==0 global is performed.Default:0")
+                        help="Nearest neighbors parameter for local novelty/niching, if knn==0 global is performed.Default:0")
         return parser 
         
     @abstractmethod

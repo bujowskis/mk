@@ -11,8 +11,7 @@ def main():
     # fixed parameters
     hof_size = 10
     popsize = 100  # todo - probably interested in the configuration
-    # FIXME - greater number of individuals in each run?? (+500)
-    pmut = 0.7
+    pmut = 0.8
     pxov = 0.2
     generations = 11  #100_000 FIXME - turn it back for experiment runs
     tournament_size = 5
@@ -21,6 +20,12 @@ def main():
     # configurations we are interested in
     migration_interval_list = [10]
     number_of_populations_list = [5]
+    # todo - popsize
+    # todo - tournament
+    pmuts = [1.0, 0.8]  # todo
+    pxovs = [0.0, 0.2]  # todo
+    # todo - mutations for numerical benchmarks
+    # todo - crossovers for numerical benchmarks
 
     dimensions = [2, 10, 20, 30, 50, 100]
     functions = [f1, f4, f6, f9, f10]
@@ -35,7 +40,7 @@ def main():
         benchmark_function, dimension, seed, migration_interval, number_of_populations = combination
 
         random.seed(seed); np.random.seed(seed)
-        experiment = ExperimentNumericalCSRun(
+        experiment = ExperimentNumericalCSRun(  # FIXme - equiwidth, not equinumber
             popsize, hof_size, number_of_populations, migration_interval,
             save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
             dimensions=dimension

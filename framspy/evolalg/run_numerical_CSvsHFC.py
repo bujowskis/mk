@@ -34,6 +34,7 @@ def main():
     # FIXME - incorporate seeds
     seeds = [seed for seed in range(10)]
 
+    # FIXME - CS, HFC - same parameters -> make it so that we have comparable results "as we go" (CS and HFC, 2 dim, same params instead of CS 2 dim, 10 dim, ...)
     for combination in list(itertools.product(*[
         functions, dimensions, seeds, migration_interval_list, number_of_populations_list
     ])):

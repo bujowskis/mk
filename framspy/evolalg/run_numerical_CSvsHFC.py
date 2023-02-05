@@ -13,7 +13,7 @@ def main():
     popsize = 100  # todo - probably interested in the configuration
     pmut = 0.8
     pxov = 0.2
-    generations = 1_000  #100_000 FIXME - turn it back for experiment runs
+    generations = 35  #100_000 FIXME - turn it back for experiment runs
     tournament_size = 5
     results_directory_path = 'results/numerical_CSvsHFC/'
 

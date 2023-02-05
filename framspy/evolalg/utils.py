@@ -4,6 +4,8 @@ import pickle
 import numpy as np
 import warnings
 warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+
 
 def ensureDir(string):
     if os.path.isdir(string):
@@ -126,5 +128,4 @@ def evaluate_cec2017(genotype, cec_benchmark_function):
     cec2017_genotype = np.array([genotype])  # convert to cec2017 input format
     cec2017_result = cec_benchmark_function(cec2017_genotype)
     result_converted = cec2017_result[0]
-    print(-result_converted)
     return -result_converted  # minimization

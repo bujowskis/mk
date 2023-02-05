@@ -2,7 +2,7 @@ from ..constants import BAD_FITNESS
 
 
 class Individual:
-    only_positive_fitness = True
+    only_positive_fitness = False  # fixme :)).....
 
     def __init__(self):
         self.genotype = None

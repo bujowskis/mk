@@ -1,10 +1,11 @@
 from pandas import DataFrame, Series
 import numpy as np
+import time
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical
 from evolalg.mutation import cec2017_numerical_mutation
 from evolalg.crossover import cec2017_numerical_crossover
-from evolalg.utils import evaluate_cec2017
+from evolalg.utils import evaluate_cec2017, get_state_filename
 
 
 class ExperimentNumericalCSRun(ExperimentConvectionSelection):
@@ -22,6 +23,8 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
             try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
+        time0 = time.process_time()
+
         for pop_idx in range(len(self.populations)):
             self.populations[pop_idx] = reinitialize_population_with_random_numerical(
                 population=self.populations[pop_idx], dimensions=self.dimensions, evaluate=self.evaluate
@@ -41,6 +44,13 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], cli_stats[3]]
+            self.update_stats(g, pool_of_all_individuals)
+            if hof_savefile is not None:
+                self.current_generation = g
+                self.time_elapsed += time.process_time() - time0
+                self.save_state(get_state_filename(hof_savefile))
+        if hof_savefile is not None:
+            self.save_genotypes(hof_savefile)
 
         return self.hof, self.stats, df
 

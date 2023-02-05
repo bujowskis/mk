@@ -4,7 +4,7 @@ import numpy as np
 import random
 from evolalg.numerical_CSvsHFC.numerical_cs import ExperimentNumericalCSRun
 from evolalg.numerical_CSvsHFC.numerical_hfc import ExperimentNumericalHFC
-from cec2017.functions import f1, f4, f6, f9, f10
+from cec2017.functions import f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10
 
 
 def main():
@@ -29,6 +29,7 @@ def main():
 
     dimensions = [2, 10, 20, 30, 50, 100]
     functions = [f1, f4, f6, f9, f10]
+    # functions = [f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10]
 
     # Seeds for multiple runs with reproducible results
     # FIXME - incorporate seeds
@@ -47,7 +48,7 @@ def main():
             dimensions=dimension
         )
         hof, stats, df = experiment.evolve(
-            hof_savefile=None,
+            hof_savefile=f'HoF/numerical_CSvsHFC/cs/HoF-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
             generations=generations,
             tournament_size=tournament_size,
             pmut=pmut,
@@ -64,7 +65,7 @@ def main():
             dimensions=dimension
         )
         hof, stats, df = experiment.evolve(
-            hof_savefile=None,
+            hof_savefile=f'HoF/numerical_CSvsHFC/hfc/HoF-hfc-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
             generations=generations,
             tournament_size=tournament_size,
             pmut=pmut,

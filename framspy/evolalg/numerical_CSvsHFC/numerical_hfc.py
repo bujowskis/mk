@@ -24,6 +24,8 @@ class ExperimentNumericalHFC(ExperimentHFC):
             try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
+        time0 = time.process_time()
+        
         for pop_idx in range(len(self.populations)):
             self.populations[pop_idx] = reinitialize_population_with_random_numerical(
                 population=self.populations[pop_idx],
@@ -62,7 +64,14 @@ class ExperimentNumericalHFC(ExperimentHFC):
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], cli_stats[3]]
-
+            self.update_stats(g, pool_of_all_individuals)
+            if hof_savefile is not None:
+                self.current_generation = g
+                self.time_elapsed += time.process_time() - time0
+                self.save_state(get_state_filename(hof_savefile))
+        if hof_savefile is not None:
+            self.save_genotypes(hof_savefile)
+            
         return self.hof, self.stats, df
 
     def add_to_worst(self):

@@ -67,7 +67,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         # EXAMPLE - Passing parameters for HFC-ADM
         lower_bound, upper_bound = self.get_bounds(
             pool_of_all_individuals, fitnesses_of_individuals,
-            set_worst_to_fixed=True, set_best_to_stdev=True
+            set_worst_to_fixed=False, set_best_to_stdev=False
         )
         population_width = (upper_bound - lower_bound) / self.number_of_populations - 2
         for i in range(2, self.number_of_populations):
@@ -106,7 +106,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         # EXAMPLE - Passing parameters for HFC-ADM
         self.admission_thresholds[1], self.admission_thresholds[-1] = self.get_bounds(
             pool_of_all_individuals, fitnesses_of_individuals,
-            set_worst_to_fixed=True, set_best_to_stdev=True
+            set_worst_to_fixed=False, set_best_to_stdev=False
         )
         lower_bound = self.admission_thresholds[1]
         upper_bound = self.admission_thresholds[-1]

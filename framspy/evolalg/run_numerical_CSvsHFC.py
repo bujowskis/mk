@@ -7,6 +7,8 @@ from evolalg.numerical_CSvsHFC.numerical_hfc import ExperimentNumericalHFC
 from cec2017.functions import f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10
 
 
+# FIXME - make script runnable from CLI
+# FIXME - add special measures into df .csv
 def main():
     # fixed parameters
     hof_size = 10
@@ -26,6 +28,7 @@ def main():
     pxovs = [0.0, 0.2]  # todo
     # todo - mutations for numerical benchmarks
     # todo - crossovers for numerical benchmarks
+    mutation_sd_fraction = [.01, .1]  # fixme - mutation sd_fraction
 
     dimensions = [2, 10, 20, 30, 50, 100]
     functions = [f11, f12, f13, f14, f15]

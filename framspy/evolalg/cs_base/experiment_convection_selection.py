@@ -36,7 +36,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         for i in range(self.number_of_populations):
             shift = i*self.popsize
             self.populations[i].population = sorted_individuals[shift:shift+self.popsize]
-            print(i, self.populations[i].population[-1].rawfitness)
+            # print(i, self.populations[i].population[-1].rawfitness)
 
     def initialize_evolution(self, initialgenotype):
         self.current_generation = 0

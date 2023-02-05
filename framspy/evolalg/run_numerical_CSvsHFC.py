@@ -13,7 +13,7 @@ def main():
     popsize = 100  # todo - probably interested in the configuration
     pmut = 0.8
     pxov = 0.2
-    generations = 35  #100_000 FIXME - turn it back for experiment runs
+    generations = 100  #100_000 FIXME - turn it back for experiment runs
     tournament_size = 5
     results_directory_path = 'results/numerical_CSvsHFC/'
 
@@ -41,21 +41,21 @@ def main():
         benchmark_function, dimension, seed, migration_interval, number_of_populations = combination
 
         random.seed(seed); np.random.seed(seed)
-        # experiment = ExperimentNumericalCSRun(  # FIXme - equiwidth, not equinumber
-        #     popsize, hof_size, number_of_populations, migration_interval,
-        #     save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
-        #     dimensions=dimension
-        # )
-        # hof, stats, df = experiment.evolve(
-        #     hof_savefile=None,
-        #     generations=generations,
-        #     tournament_size=tournament_size,
-        #     pmut=pmut,
-        #     pxov=pxov,
-        #     try_from_saved_file=False,
-        #     initialgenotype=np.zeros(dimension)
-        # )
-        # df.to_csv(f'{results_directory_path}numerical_CSvsHFC-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
+        experiment = ExperimentNumericalCSRun(  # FIXme - equiwidth, not equinumber
+            popsize, hof_size, number_of_populations, migration_interval,
+            save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
+            dimensions=dimension
+        )
+        hof, stats, df = experiment.evolve(
+            hof_savefile=None,
+            generations=generations,
+            tournament_size=tournament_size,
+            pmut=pmut,
+            pxov=pxov,
+            try_from_saved_file=False,
+            initialgenotype=np.zeros(dimension)
+        )
+        df.to_csv(f'{results_directory_path}numerical_CSvsHFC-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
 
         random.seed(seed); np.random.seed(seed)
         experiment = ExperimentNumericalHFC(

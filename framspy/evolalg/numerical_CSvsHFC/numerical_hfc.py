@@ -47,7 +47,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
                 i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
                 i.innovation_in_time[self.current_epoch] = 1.0
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
+        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'innovation_in_time'])
 
         # CALIBRATION STAGE
         pool_of_all_individuals = []
@@ -78,7 +78,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             [pool_of_all_individuals.extend(p.population) for p in self.populations]
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], cli_stats[3]]
+            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].innovation_in_time]
             self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g

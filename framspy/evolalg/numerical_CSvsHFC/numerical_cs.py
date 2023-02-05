@@ -28,7 +28,7 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
                 population=self.populations[pop_idx], dimensions=self.dimensions, evaluate=self.evaluate
             )
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
+        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness'])
 
         for g in range(self.current_generation, generations):
             for p in self.populations:

@@ -91,13 +91,13 @@ class ExperimentABC(ABC):
             self.hof.add(h)
 
     def update_stats(self, generation, all_individuals):
-        worst = min(all_individuals, key=lambda item: item.rawfitness)
         best = max(all_individuals, key=lambda item: item.rawfitness)
+        best_idx = all_individuals.index(best)
         # instead of single best, could add all individuals in population here, but then the outcome would depend on the order of adding
         self.hof.add(best)
         self.stats.append(best.rawfitness if self.save_only_best else best)
-        self.cli_stats = (generation, len(all_individuals), worst.rawfitness, best.rawfitness)
-        print(f"{generation}\t{len(all_individuals)}\t{worst.rawfitness}\t{best.rawfitness}")
+        self.cli_stats = (generation, len(all_individuals), best.rawfitness, best_idx)
+        print(f"{generation}\t{len(all_individuals)}\t{best.rawfitness}")
 
     def get_cli_stats(self):
         return self.cli_stats

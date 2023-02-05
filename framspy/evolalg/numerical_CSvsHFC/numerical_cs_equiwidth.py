@@ -73,6 +73,10 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
         self.current_epoch: int = 0
         time0 = time.process_time()
 
+        pool_of_all_individuals = []
+        for p in self.populations:
+            pool_of_all_individuals.extend(p.population)
+
         for pop_idx in range(len(self.populations)):
             self.populations[pop_idx] = reinitialize_population_with_random_numerical(
                 population=self.populations[pop_idx], dimensions=self.dimensions, evaluate=self.evaluate
@@ -80,7 +84,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             for i in self.populations[pop_idx].population:
                 i.contributor_spops = [0.0 for _ in range(self.number_of_epochs)]
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
+        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops'])
 
         for g in range(self.current_generation, generations):
             for p in self.populations:
@@ -104,7 +108,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
                 pool_of_all_individuals.extend(p.population)
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], cli_stats[3]]
+            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops]
             self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g

@@ -128,7 +128,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
-                self.save_state(get_state_filename())
+                self.save_state(get_state_filename(hof_savefile))
 
         if hof_savefile is not None:
             self.save_genotypes(hof_savefile)

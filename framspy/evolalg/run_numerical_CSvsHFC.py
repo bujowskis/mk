@@ -47,7 +47,7 @@ def main():
             dimensions=dimension
         )
         hof, stats, df = experiment.evolve(
-            hof_savefile=None,
+            hof_savefile=f'HoF/numerical_CSvsHFC/cs/HoF-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
             generations=generations,
             tournament_size=tournament_size,
             pmut=pmut,
@@ -64,7 +64,7 @@ def main():
             dimensions=dimension
         )
         hof, stats, df = experiment.evolve(
-            hof_savefile=None,
+            hof_savefile=f'HoF/numerical_CSvsHFC/hfc/HoF-hfc-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
             generations=generations,
             tournament_size=tournament_size,
             pmut=pmut,

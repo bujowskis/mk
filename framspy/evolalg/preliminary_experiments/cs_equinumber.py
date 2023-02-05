@@ -1,7 +1,4 @@
-from pandas import DataFrame, Series
-import numpy as np
-import random
-import copy
+from pandas import DataFrame
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 
 
@@ -37,18 +34,3 @@ class ExperimentCSRun(ExperimentConvectionSelection):
         df.to_csv(f'{self.results_directory_path}/cs_equinumber-{self.benchmark_function.__name__}-{len(initialgenotype)}-{self.migration_interval}-{len(self.populations)}.csv')
 
         return self.hof, self.stats
-
-    def cross_over(self, gen1, gen2):
-        division_point = len(gen1) // 2
-        output = list(gen1[:division_point]) + list(gen2[division_point:]) if random.getrandbits(1) == 0 else \
-            list(gen2[:division_point]) + list(gen1[division_point:])
-        return output
-
-    def evaluate(self, genotype):
-        cec2017_genotype = np.array([genotype])
-        return self.benchmark_function(cec2017_genotype)
-
-    def mutate(self, gen1):
-        output = copy.deepcopy(gen1)
-        output[np.random.randint(len(output))] += random.uniform(-5.0, 5.0)
-        return output

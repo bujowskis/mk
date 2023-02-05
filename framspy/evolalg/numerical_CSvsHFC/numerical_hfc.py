@@ -5,8 +5,8 @@ import numpy as np
 from evolalg.hfc_base.experiment_hfc import ExperimentHFC
 from evolalg.utils import get_state_filename, evaluate_cec2017
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical, fill_population_with_random_numerical
-from evolalg.mutation import simple_numerical_mutation
-from evolalg.crossover import simple_numerical_crossover
+from evolalg.mutation import cec2017_numerical_mutation
+from evolalg.crossover import cec2017_numerical_crossover
 
 
 class ExperimentNumericalHFC(ExperimentHFC):
@@ -76,7 +76,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
         return evaluate_cec2017(genotype, self.benchmark_function)
 
     def mutate(self, gen1):
-        return simple_numerical_mutation(gen1)
+        return cec2017_numerical_mutation(gen1)
 
     def cross_over(self, gen1, gen2):
-        return simple_numerical_crossover(gen1, gen2)
+        return cec2017_numerical_crossover(gen1, gen2)

@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 import random
-from evolalg.numerical_CSvsHFC.numerical_cs import ExperimentNumericalCSRun
+from evolalg.numerical_CSvsHFC.numerical_cs_equiwidth import ExperimentNumericalCSEquiwidth
 from evolalg.numerical_CSvsHFC.numerical_hfc import ExperimentNumericalHFC
 from cec2017.functions import f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10
 
@@ -42,13 +42,13 @@ def main():
         benchmark_function, dimension, seed, migration_interval, number_of_populations = combination
 
         random.seed(seed); np.random.seed(seed)
-        experiment = ExperimentNumericalCSRun(  # FIXme - equiwidth, not equinumber
+        experiment = ExperimentNumericalCSEquiwidth(
             popsize, hof_size, number_of_populations, migration_interval,
             save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
             dimensions=dimension
         )
         hof, stats, df = experiment.evolve(
-            hof_savefile=f'HoF/numerical_CSvsHFC/cs/HoF-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
+            hof_savefile=f'HoF/numerical_CSvsHFC/cs-ew/HoF-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
             generations=generations,
             tournament_size=tournament_size,
             pmut=pmut,

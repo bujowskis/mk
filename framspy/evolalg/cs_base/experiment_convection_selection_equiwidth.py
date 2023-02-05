@@ -1,12 +1,9 @@
 import numpy as np
 from intervals import closed, openclosed
+from abc import ABC
 
-from experiment_convection_selection import ExperimentConvectionSelection
-from ..structures.population_methods import remove_excess_individuals_random
-
-# todo - try running in SLURM / super computers (slower than SLURM, but a workaround if sth wrong with SLURM)
-#   GECKO - numerical benchmarks (fast enough) framsticks - too slow
-#   writing the paper - the most time-consuming, but may go for CEC2004(?) benchmarks (DEAP benchmark functions?)
+from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
+from evolalg.structures.population_methods import remove_excess_individuals_random
 
 # how to define the absolute range bounds? (min and max from pool of all individuals?)
 #   YES (current min, current max - not historical)
@@ -23,19 +20,7 @@ from ..structures.population_methods import remove_excess_individuals_random
 #   look for the bottom explanations (may use as a reference code KacperPerz/evolalg - after our implementation)
 
 
-class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
-    def mutate(self, gen1):
-        # todo - use modular
-        pass
-
-    def cross_over(self, gen1, gen2):
-        # todo - use modular
-        pass
-
-    def evaluate(self, genotype):
-        # todo - use modular
-        pass
-
+class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection, ABC):
     def migrate_populations(self):
         """
         Equiwidth migration - populations with distribution of fixed ranges of fitness
@@ -49,16 +34,18 @@ class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
         # todo - check if works for empty subpopulation case
 
         # get the needed information about the populations
-        pool_of_all_individuals = np.concatenate(self.populations)
-        lower_bound = min(pool_of_all_individuals, key=lambda x: x.fitness)
-        upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness)
+        pool_of_all_individuals = []
+        for p in self.populations:
+            pool_of_all_individuals.extend(p.population)
+        lower_bound = min(pool_of_all_individuals, key=lambda x: x.fitness).fitness
+        upper_bound = max(pool_of_all_individuals, key=lambda x: x.fitness).fitness
         population_width = (upper_bound - lower_bound) / self.number_of_populations
 
         # create subpopulations' fitness ranges
         population_cuts = [lower_bound + x*population_width for x in range(self.number_of_populations)]
         population_cuts[-1] = upper_bound  # ensures no python float errors
         subpopulations_fitness_ranges = {
-            openclosed(population_cuts[x], population_cuts[x+1]): [] for x in range(len(population_cuts))
+            openclosed(population_cuts[x], population_cuts[x+1]): [] for x in range(len(population_cuts)-1)  # FIXME - 1 element shorter
         }
         subpopulations_fitness_ranges[closed(population_cuts[0], population_cuts[1])] = subpopulations_fitness_ranges.pop(openclosed(population_cuts[0], population_cuts[1]))  # includes the lower_bound individual's fitness
 
@@ -70,10 +57,9 @@ class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
             ## individual_groups[i] = np.where(i.fitness in ranges_subpopulations.keys(), ranges_subpopulatons.values())
 
         # then we'd have, e.g., individual_groups = {<individual>: 0, ...}, meaning the <individual> is assigned to range group 0
-        
-        
+
         # place individuals in the respective subpopulations
-        for i in pool_of_all_individuals:  # fixme - needs optimization, O(n^2) for now
+        for i in pool_of_all_individuals:  # fixme (future) - needs optimization, O(n^2) for now
             for fitness_range in subpopulations_fitness_ranges.keys():
                 if i.fitness in fitness_range:
                     subpopulations_fitness_ranges[fitness_range].append(i)
@@ -98,6 +84,8 @@ class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection):
         # fill populations with not enough individuals
         # NOTE - seems to be handled by experiment_abc.make_new_population todo - make sure
 
-        # assign migrated subpopulations
+        # assign migrated subpopulations  # FIXME - not the same
+        print(len(self.populations))
+        print(len(subpopulations_fitness_ranges))
         for i in range(len(self.populations)):
             self.populations[i] = subpopulations_fitness_ranges[sorted_sub_pop_ranges[i]]

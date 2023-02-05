@@ -1,5 +1,4 @@
-from pandas import DataFrame, Series
-import numpy as np
+from pandas import DataFrame
 import time
 from evolalg.cs_base.experiment_convection_selection import ExperimentConvectionSelection
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical

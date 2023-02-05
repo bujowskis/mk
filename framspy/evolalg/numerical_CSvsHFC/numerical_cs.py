@@ -23,7 +23,6 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
         time0 = time.process_time()
-
         for pop_idx in range(len(self.populations)):
             self.populations[pop_idx] = reinitialize_population_with_random_numerical(
                 population=self.populations[pop_idx], dimensions=self.dimensions, evaluate=self.evaluate

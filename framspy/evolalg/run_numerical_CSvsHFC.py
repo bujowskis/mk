@@ -13,7 +13,7 @@ def main():
     popsize = 100  # todo - probably interested in the configuration
     pmut = 0.8
     pxov = 0.2
-    generations = 11  #100_000 FIXME - turn it back for experiment runs
+    generations = 1_000  #100_000 FIXME - turn it back for experiment runs
     tournament_size = 5
     results_directory_path = 'results/numerical_CSvsHFC/'
 
@@ -74,7 +74,7 @@ def main():
         )
         df.to_csv(
             f'{results_directory_path}numerical_CSvsHFC-hfc-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
-
+        break  # fixme
 
 if __name__ == "__main__":
     main()

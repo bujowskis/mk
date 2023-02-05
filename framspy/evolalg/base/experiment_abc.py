@@ -50,32 +50,25 @@ class ExperimentABC(ABC):
         Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""
 
         newpop = []
-        N = len(individuals)
-        expected_mut = int(N * prob_mut)
-        expected_xov = int(N * prob_xov)
-        assert expected_mut + expected_xov <= N,\
-            f"If probabilities of mutation ({prob_mut}) and crossover ({prob_xov}) added together exceed 1.0, then the population would grow every generation..."
-        ris = RandomIndexSequence(N)  # fixme (future) - move to be handled by tournament
+        expected_mut = int(self.popsize * prob_mut)
+        expected_xov = int(self.popsize * prob_xov)
+        assert expected_mut + expected_xov <= self.popsize, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
+        ris = RandomIndexSequence(len(individuals))
 
         # adding valid mutants of selected individuals...
         while len(newpop) < expected_mut:
-            ind = self.select(
-                individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
             self.addGenotypeIfValid(newpop, self.mutate(ind.genotype))
 
         # adding valid crossovers of selected individuals...
         while len(newpop) < expected_mut + expected_xov:
-            ind1 = self.select(
-                individuals, tournament_size=tournament_size, random_index_sequence=ris)
-            ind2 = self.select(
-                individuals, tournament_size=tournament_size, random_index_sequence=ris)
-            self.addGenotypeIfValid(
-                newpop, self.cross_over(ind1.genotype, ind2.genotype))
+            ind1 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind2 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            self.addGenotypeIfValid(newpop, self.cross_over(ind1.genotype, ind2.genotype))
 
         # select clones to fill up the new population until we reach the same size as the input population
-        while len(newpop) < len(individuals):
-            ind = self.select(
-                individuals, tournament_size=tournament_size, random_index_sequence=ris)
+        while len(newpop) < self.popsize:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
             newpop.append(Individual().copyFrom(ind))
 
         return newpop

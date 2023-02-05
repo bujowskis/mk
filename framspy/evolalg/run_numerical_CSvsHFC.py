@@ -42,21 +42,21 @@ def main():
         benchmark_function, dimension, seed, migration_interval, number_of_populations = combination
 
         random.seed(seed); np.random.seed(seed)
-        experiment = ExperimentNumericalCSEquiwidth(
-            popsize, hof_size, number_of_populations, migration_interval,
-            save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
-            dimensions=dimension
-        )
-        hof, stats, df = experiment.evolve(
-            hof_savefile=f'HoF/numerical_CSvsHFC/cs-ew/HoF-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
-            generations=generations,
-            tournament_size=tournament_size,
-            pmut=pmut,
-            pxov=pxov,
-            try_from_saved_file=False,
-            initialgenotype=np.zeros(dimension)
-        )
-        df.to_csv(f'{results_directory_path}numerical_CSvsHFC-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
+        # experiment = ExperimentNumericalCSEquiwidth(
+        #     popsize, hof_size, number_of_populations, migration_interval,
+        #     save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
+        #     dimensions=dimension
+        # )
+        # hof, stats, df = experiment.evolve(
+        #     hof_savefile=f'HoF/numerical_CSvsHFC/cs-ew/HoF-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.gen',
+        #     generations=generations,
+        #     tournament_size=tournament_size,
+        #     pmut=pmut,
+        #     pxov=pxov,
+        #     try_from_saved_file=False,
+        #     initialgenotype=np.zeros(dimension)
+        # )
+        # df.to_csv(f'{results_directory_path}numerical_CSvsHFC-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
 
         random.seed(seed); np.random.seed(seed)
         experiment = ExperimentNumericalHFC(

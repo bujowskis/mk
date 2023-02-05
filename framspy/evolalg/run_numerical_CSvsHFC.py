@@ -28,7 +28,7 @@ def main():
     # todo - crossovers for numerical benchmarks
 
     dimensions = [2, 10, 20, 30, 50, 100]
-    functions = [f1, f4, f6, f9, f10]
+    functions = [f11, f12, f13, f14, f15]
     # functions = [f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10]
 
     # Seeds for multiple runs with reproducible results
@@ -36,6 +36,11 @@ def main():
     seeds = [seed for seed in range(10)]
 
     # FIXME - CS, HFC - same parameters -> make it so that we have comparable results "as we go" (CS and HFC, 2 dim, same params instead of CS 2 dim, 10 dim, ...)
+    for combination in list(itertools.product(*[
+        functions, seeds
+    ])):
+        break  # fixme
+
     for combination in list(itertools.product(*[
         functions, dimensions, seeds, migration_interval_list, number_of_populations_list
     ])):

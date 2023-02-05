@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import pickle
+import numpy as np
 import time
 from abc import ABC, abstractmethod
 
@@ -105,7 +106,9 @@ class ExperimentABC(ABC):
         # instead of single best, could add all individuals in population here, but then the outcome would depend on the order of adding
         self.hof.add(best)
         self.stats.append(best.rawfitness if self.save_only_best else best)
-        self.cli_stats = (generation, len(all_individuals), worst.rawfitness, best.rawfitness)
+        worst_fitness = worst.rawfitness[0] if worst.rawfitness is not 0 else 0
+        best_fitness = best.rawfitness[0] if best.rawfitness is not 0 else 0
+        self.cli_stats = (generation, len(all_individuals), worst_fitness, best_fitness)
         print(f"{generation}\t{len(all_individuals)}\t{worst.rawfitness}\t{best.rawfitness}")
 
     def get_cli_stats(self):

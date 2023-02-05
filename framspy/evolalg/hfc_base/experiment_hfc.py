@@ -73,7 +73,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i - 1) * population_width
 
-    def get_bounds(pool_of_all_individuals, fitnesses_of_individuals, set_worst_to_fixed: bool, set_best_to_stdev: bool):
+    def get_bounds(self, pool_of_all_individuals, fitnesses_of_individuals, set_worst_to_fixed: bool, set_best_to_stdev: bool):
         # HFC-ADM approach
         if set_worst_to_fixed and set_best_to_stdev:
             avg_random_fitness = sum(fitnesses_of_individuals)/len(pool_of_all_individuals)

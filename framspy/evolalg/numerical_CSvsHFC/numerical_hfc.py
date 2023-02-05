@@ -61,7 +61,8 @@ class ExperimentNumericalHFC(ExperimentHFC):
             [pool_of_all_individuals.extend(p.population) for p in self.populations]
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2][0], cli_stats[3][0]]
+            print(cli_stats)
+            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], cli_stats[3]]
 
         return self.hof, self.stats, df
 

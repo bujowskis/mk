@@ -22,7 +22,7 @@ class ExperimentConvectionSelectionEquiwidth(ExperimentConvectionSelection, ABC)
         population_cuts = [lower_bound + x*population_width for x in range(self.number_of_populations+1)]
         population_cuts[-1] = upper_bound  # ensures no python float errors
         subpopulations_fitness_ranges = {
-            openclosed(population_cuts[x], population_cuts[x+1]): [] for x in range(len(population_cuts)-1)  # FIXME - 1 element shorter
+            openclosed(population_cuts[x], population_cuts[x+1]): [] for x in range(len(population_cuts)-1)
         }
         subpopulations_fitness_ranges[closed(population_cuts[0], population_cuts[1])] = subpopulations_fitness_ranges.pop(openclosed(population_cuts[0], population_cuts[1]))  # includes the lower_bound individual's fitness
         # place individuals in the respective subpopulations

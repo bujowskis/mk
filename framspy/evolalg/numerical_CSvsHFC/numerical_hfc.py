@@ -1,12 +1,19 @@
 from pandas import DataFrame
 import time
 import numpy as np
+import copy
+import json
+from evolalg.json_encoders import Encoder
 
 from evolalg.hfc_base.experiment_hfc import ExperimentHFC
 from evolalg.utils import get_state_filename, evaluate_cec2017
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical, fill_population_with_random_numerical
 from evolalg.mutation import cec2017_numerical_mutation
 from evolalg.crossover import cec2017_numerical_crossover
+
+from evolalg.base.random_sequence_index import RandomIndexSequence
+from evolalg.structures.individual import Individual
+from evolalg.constants import BAD_FITNESS
 
 
 class ExperimentNumericalHFC(ExperimentHFC):
@@ -18,12 +25,16 @@ class ExperimentNumericalHFC(ExperimentHFC):
         self.benchmark_function = benchmark_function
         self.dimensions = dimensions
         self.results_directory_path = results_directory_path
+        self.number_of_epochs: int = None
+        self.current_epoch: int = None
 
     def evolve(
             self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
             try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
+        self.number_of_epochs: int = int(np.floor(generations/self.migration_interval) + 1)  # account for epoch 0 (before start of migration)
+        self.current_epoch: int = 0
         time0 = time.process_time()
         
         for pop_idx in range(len(self.populations)):
@@ -32,6 +43,9 @@ class ExperimentNumericalHFC(ExperimentHFC):
                 dimensions=self.dimensions,
                 evaluate=self.evaluate
             )
+            for i in self.populations[pop_idx].population:
+                i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
+                i.innovation_in_time[self.current_epoch] = 1.0
 
         df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
 
@@ -57,6 +71,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
                 p.population = self.make_new_population(p.population, pmut, pxov, tournament_size)
 
             if g % self.migration_interval == 0:
+                self.current_epoch += 1
                 self.migrate_populations()
 
             pool_of_all_individuals = []
@@ -74,12 +89,64 @@ class ExperimentNumericalHFC(ExperimentHFC):
             
         return self.hof, self.stats, df
 
+    def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):
+        newpop = []
+        expected_mut = int(self.popsize * prob_mut)
+        expected_xov = int(self.popsize * prob_xov)
+        assert expected_mut + expected_xov <= self.popsize, f"If probabilities of mutation ({prob_mut}) and crossover ({prob_xov}) added together exceed 1.0, then the population would grow every generation..."
+        ris = RandomIndexSequence(len(individuals))
+
+        # adding valid mutants of selected individuals...
+        while len(newpop) < expected_mut:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            new_individual = Individual()
+            new_individual.set_and_evaluate(self.mutate(ind.genotype), self.evaluate)
+            if new_individual.fitness is not BAD_FITNESS:
+                new_individual.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
+                newpop.append(new_individual)
+
+        # adding valid crossovers of selected individuals...
+        while len(newpop) < expected_mut + expected_xov:
+            ind1 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind2 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            new_individual = Individual()
+            new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
+            if new_individual.fitness is not BAD_FITNESS:
+                new_individual.innovation_in_time = list(np.average([ind1.innovation_in_time, ind2.innovation_in_time], axis=0))
+                newpop.append(new_individual)
+
+        # FIXME - no way to introduce random individuals in make_new_population
+        # select clones to fill up the new population until we reach the same size as the input population
+        while len(newpop) < self.popsize:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind_copy = Individual().copyFrom(ind)
+            ind_copy.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
+            newpop.append(ind_copy)
+
+        return newpop
+
     def add_to_worst(self):
         self.populations[0] = fill_population_with_random_numerical(
             population=self.populations[0],
             dimensions=self.dimensions,
             evaluate=self.evaluate
         )
+        for i in self.populations[0].population:
+            if not hasattr(i, 'innovation_in_time'):
+                i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
+                i.innovation_in_time[self.current_epoch] = 1.0
+
+    def save_genotypes(self, filename):
+        state_to_save = {
+            "number_of_generations": self.current_generation,
+            "hof": [{
+                "genotype": individual.genotype,
+                "fitness": individual.rawfitness,
+                "innovation_in_time": individual.innovation_in_time
+            } for individual in self.hof.hof],
+        }
+        with open(f"{filename}.json", 'w') as f:
+            json.dump(state_to_save, f, cls=Encoder)
 
     def evaluate(self, genotype):
         return evaluate_cec2017(genotype, self.benchmark_function)

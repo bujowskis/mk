@@ -1,8 +1,5 @@
 import argparse
 import json
-import os
-import pickle
-import numpy as np
 import time
 from abc import ABC, abstractmethod
 
@@ -52,7 +49,7 @@ class ExperimentABC(ABC):
         newpop = []
         expected_mut = int(self.popsize * prob_mut)
         expected_xov = int(self.popsize * prob_xov)
-        assert expected_mut + expected_xov <= self.popsize, "If probabilities of mutation (%g) and crossover (%g) added together exceed 1.0, then the population would grow every generation..." % (prob_mut, prob_xov)
+        assert expected_mut + expected_xov <= self.popsize, f"If probabilities of mutation ({prob_mut}) and crossover ({prob_xov}) added together exceed 1.0, then the population would grow every generation..."
         ris = RandomIndexSequence(len(individuals))
 
         # adding valid mutants of selected individuals...

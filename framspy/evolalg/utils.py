@@ -1,7 +1,9 @@
 import argparse
 import os
 import pickle
-
+import numpy as np
+import warnings
+warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
 def ensureDir(string):
     if os.path.isdir(string):
@@ -113,3 +115,10 @@ def write_state_to_file(state, state_filename: str):
             f"Message: {ex}\n"
             f"This does not prevent the experiment from continuing, but let\'s stop here to fix the problem with saving state files."
         )
+
+
+def evaluate_cec2017(genotype, cec_benchmark_function):
+    if any(x < -100 or x > 100 for x in genotype):
+        return -np.inf
+    cec2017_genotype = np.array([genotype])
+    return cec_benchmark_function(cec2017_genotype)

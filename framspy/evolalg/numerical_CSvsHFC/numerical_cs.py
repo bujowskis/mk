@@ -4,6 +4,7 @@ from evolalg.cs_base.experiment_convection_selection import ExperimentConvection
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical
 from evolalg.mutation import simple_numerical_mutation
 from evolalg.crossover import simple_numerical_crossover
+from evolalg.utils import evaluate_cec2017
 
 
 class ExperimentNumericalCSRun(ExperimentConvectionSelection):
@@ -47,10 +48,7 @@ class ExperimentNumericalCSRun(ExperimentConvectionSelection):
         return simple_numerical_crossover(gen1, gen2)
 
     def evaluate(self, genotype):
-        if any(x < -100 or x > 100 for x in genotype):
-            return -np.inf
-        cec2017_genotype = np.array([genotype])
-        return self.benchmark_function(cec2017_genotype)
+        return evaluate_cec2017(genotype, self.benchmark_function)
 
     def mutate(self, gen1):
         return simple_numerical_mutation(gen1)

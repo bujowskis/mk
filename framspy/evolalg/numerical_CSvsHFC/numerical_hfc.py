@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from evolalg.hfc_base.experiment_hfc import ExperimentHFC
-from evolalg.utils import get_state_filename
+from evolalg.utils import get_state_filename, evaluate_cec2017
 from evolalg.structures.population_methods import reinitialize_population_with_random_numerical, fill_population_with_random_numerical
 from evolalg.mutation import simple_numerical_mutation
 from evolalg.crossover import simple_numerical_crossover
@@ -61,7 +61,6 @@ class ExperimentNumericalHFC(ExperimentHFC):
             [pool_of_all_individuals.extend(p.population) for p in self.populations]
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            print(cli_stats)
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], cli_stats[3]]
 
         return self.hof, self.stats, df
@@ -74,10 +73,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
         )
 
     def evaluate(self, genotype):
-        if any(x < -100 or x > 100 for x in genotype):
-            return -np.inf
-        cec2017_genotype = np.array([genotype])
-        return self.benchmark_function(cec2017_genotype)
+        return evaluate_cec2017(genotype, self.benchmark_function)
 
     def mutate(self, gen1):
         return simple_numerical_mutation(gen1)

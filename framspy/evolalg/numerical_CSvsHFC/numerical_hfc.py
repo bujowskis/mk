@@ -25,7 +25,11 @@ class ExperimentNumericalHFC(ExperimentHFC):
     ):
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
         for pop_idx in range(len(self.populations)):
-            self.populations[pop_idx] = reinitialize_population_with_random_numerical(self.populations[pop_idx], self.dimensions)
+            self.populations[pop_idx] = reinitialize_population_with_random_numerical(
+                population=self.populations[pop_idx],
+                dimensions=self.dimensions,
+                evaluate=self.evaluate
+            )
 
         df = DataFrame(columns=['generation', 'total_popsize', 'worst_fitness', 'best_fitness'])
 
@@ -62,7 +66,11 @@ class ExperimentNumericalHFC(ExperimentHFC):
         return self.hof, self.stats, df
 
     def add_to_worst(self):
-        self.populations[0] = fill_population_with_random_numerical(self.populations[0], self.dimensions)
+        self.populations[0] = fill_population_with_random_numerical(
+            population=self.populations[0],
+            dimensions=self.dimensions,
+            evaluate=self.evaluate
+        )
 
     def evaluate(self, genotype):
         if any(x < -100 or x > 100 for x in genotype):

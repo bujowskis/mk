@@ -22,31 +22,35 @@ def remove_excess_individuals_random(individuals: List[Individual], population_s
 
 
 def fill_population_with_random_numerical(
-        population: PopulationStructures, dimensions: int, upper_bound: float = -100, lower_bound: float = 100
+        population: PopulationStructures, dimensions: int, evaluate,
+        upper_bound: float = -100, lower_bound: float = 100
 ) -> PopulationStructures:
     """
     Fills the population with random individuals, sampled uniformly from lower to upper bound, within the given dimensions
     """
     difference_from_target_size = len(population.population) - population.population_size
-    print(f'before fill: {population.population}')
     if difference_from_target_size < 0:
-        population.population.extend([[random.uniform(lower_bound, upper_bound) for _ in range(dimensions)] for _ in range(difference_from_target_size)])  # FIXME - Individual, set_and_evaluate() NOTE - add evaluate() as individual method
-    print(f'after fill: {population.population}')
+        individuals = [Individual() for _ in range(-difference_from_target_size)]
+        for individual in individuals:
+            individual.set_and_evaluate(
+                genotype=[random.uniform(lower_bound, upper_bound) for _ in range(dimensions)],
+                evaluate=evaluate
+            )
+        population.population.extend(individuals)  # FIXME (future) - add evaluate() as individual method
 
     assert len(population.population) >= population.population_size
     return population
 
 
 def reinitialize_population_with_random_numerical(
-        population: PopulationStructures, dimensions: int, upper_bound: float = -100, lower_bound: float = 100
+        population: PopulationStructures, dimensions: int, evaluate,
+        upper_bound: float = -100, lower_bound: float = 100
 ) -> PopulationStructures:
     """
     Wipes the current population's individuals and fills it with randomly sampled numerical ones
     """
-    print(f'before reinit: {population.population}')
     population.population = []
-    population = fill_population_with_random_numerical(population, dimensions, upper_bound, lower_bound)
-    print(f'after reinit: {population.population}')
+    population = fill_population_with_random_numerical(population, dimensions, evaluate, upper_bound, lower_bound)
 
     assert len(population.population) >= population.population_size
     return population

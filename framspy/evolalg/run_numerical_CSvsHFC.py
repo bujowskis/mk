@@ -41,24 +41,23 @@ def main():
         benchmark_function, dimension, seed, migration_interval, number_of_populations = combination
 
         random.seed(seed); np.random.seed(seed)
-        experiment = ExperimentNumericalCSRun(  # FIXme - equiwidth, not equinumber
-            popsize, hof_size, number_of_populations, migration_interval,
-            save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
-            dimensions=dimension
-        )
-        hof, stats, df = experiment.evolve(
-            hof_savefile=None,
-            generations=generations,
-            tournament_size=tournament_size,
-            pmut=pmut,
-            pxov=pxov,
-            try_from_saved_file=False,
-            initialgenotype=np.zeros(dimension)
-        )
-        df.to_csv(f'{results_directory_path}numerical_CSvsHFC-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
+        # experiment = ExperimentNumericalCSRun(  # FIXme - equiwidth, not equinumber
+        #     popsize, hof_size, number_of_populations, migration_interval,
+        #     save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,
+        #     dimensions=dimension
+        # )
+        # hof, stats, df = experiment.evolve(
+        #     hof_savefile=None,
+        #     generations=generations,
+        #     tournament_size=tournament_size,
+        #     pmut=pmut,
+        #     pxov=pxov,
+        #     try_from_saved_file=False,
+        #     initialgenotype=np.zeros(dimension)
+        # )
+        # df.to_csv(f'{results_directory_path}numerical_CSvsHFC-cs-{benchmark_function.__name__}-{dimension}-{seed}-{migration_interval}-{number_of_populations}.csv')
 
-        random.seed(seed);
-        np.random.seed(seed)
+        random.seed(seed); np.random.seed(seed)
         experiment = ExperimentNumericalHFC(
             popsize, hof_size, number_of_populations, migration_interval,
             save_only_best=True, benchmark_function=benchmark_function, results_directory_path=results_directory_path,

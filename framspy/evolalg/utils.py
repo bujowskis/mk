@@ -125,7 +125,9 @@ def evaluate_cec2017(genotype, cec_benchmark_function):
     """
     if any(x < -100 or x > 100 for x in genotype):
         return -np.inf
+
     cec2017_genotype = np.array([genotype])  # convert to cec2017 input format
     cec2017_result = cec_benchmark_function(cec2017_genotype)
     result_converted = cec2017_result[0]
+    
     return -result_converted  # minimization

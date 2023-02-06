@@ -4,7 +4,7 @@ import numpy as np
 import random
 from evolalg.numerical_CSvsHFC.numerical_cs_equiwidth import ExperimentNumericalCSEquiwidth
 from evolalg.numerical_CSvsHFC.numerical_hfc import ExperimentNumericalHFC
-from cec2017.functions import f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10
+from cec2017.functions import f1, f3, f4, f5, f6, f7, f8, f9, f10, f21, f22, f23, f24, f25, f26, f27, f28, f29, f30
 
 
 # FIXME - make script runnable from CLI
@@ -31,18 +31,19 @@ def main():
     mutation_sd_fraction = [.01, .1]  # fixme - mutation sd_fraction
 
     dimensions = [2, 10, 20, 30, 50, 100]
-    functions = [f1, f3, f4, f5, f6, f7, f8, f9, f10]
-    # functions = [f11, f12, f13, f14, f15, f16, f17, f18, f19, f20, f1, f3, f4, f5, f6, f7, f8, f9, f10]
+    # functions = [f1, f3, f4, f5, f6, f7, f8, f9, f10]
+    functions = [f21, f22, f23, f24, f25, f26, f27, f28, f29, f30]
+    # functions = [f21, f22, f23, f24, f25, f26, f27, f28, f29, f30, f1, f3, f4, f5, f6, f7, f8, f9, f10]
 
     # Seeds for multiple runs with reproducible results
     # FIXME - incorporate seeds
     seeds = [seed for seed in range(10)]
 
     # FIXME - CS, HFC - same parameters -> make it so that we have comparable results "as we go" (CS and HFC, 2 dim, same params instead of CS 2 dim, 10 dim, ...)
-    # for combination in list(itertools.product(*[
-    #     functions, seeds
-    # ])):
-    #     break  # fixme
+    for combination in list(itertools.product(*[
+        functions, seeds
+    ])):
+        break  # fixme
 
     for combination in list(itertools.product(*[
         functions, dimensions, seeds, migration_interval_list, number_of_populations_list

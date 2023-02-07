@@ -12,7 +12,7 @@ from cec2017.functions import f1, f3, f4, f5, f6, f7, f8, f9, f10, f21, f22, f23
 def main():
     NUMBER_OF_REPETITIONS = 30
     hof_size = 10
-    generations = 10
+    evaluations = 100_000
     functions = [f21, f22, f23, f24, f25, f26, f27, f28, f29, f30, f1, f3, f4, f5, f6, f7, f8, f9, f10]
     dimension = 30
     parameters_default = {"migration_interval": 10, "populations": 25, "subpopsize": 50, "pmut": 0.8, "pxov": 0.2, "tournament_size": 5}
@@ -80,6 +80,9 @@ def main():
         for fraction in mutation_sd_fraction:
             for benchmark_function in functions:
                 migration_interval, number_of_populations, subpopsize, pmut, pxov, tournament_size = parameters_default.values()
+                #generations = int(np.ceil(evaluations / (number_of_populations * subpopsize)))
+                #print(f'generations: {generations}')
+                generations = 500
 
                 experiment = ExperimentNumericalCSEquiwidth(
                     subpopsize, hof_size, number_of_populations, migration_interval,

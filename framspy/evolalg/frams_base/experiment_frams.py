@@ -123,4 +123,5 @@ class ExperimentFrams(ExperimentABC):
                                     help="Maximum number of Neural connections. Default: no limit")
         parser.add_argument('-max_numgenochars',type= int, default= None,
                                     help="Maximum number of characters in genotype (including the format prefix, if any}. Default: no limit")
+      
         return parser

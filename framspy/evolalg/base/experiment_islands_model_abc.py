@@ -92,4 +92,8 @@ class ExperimentIslands(ExperimentABC, ABC):
                             help="Number of subpopulations (islands)")
         parser.add_argument("-generations_migration", type=int, default=10,
                             help="Number of generations separating migration events when genotypes migrate between subpopulations (islands)")
+        parser.add_argument('-mutsize',type=float, default=0.1, help="Mutation standard deviation fraction")                
+        parser.add_argument('-runnum',type=int, default=0, help="Current run number")  
+        parser.add_argument('-dims',type=int, default=2, help="Dimensionality of a benchmark function")  
+        parser.add_argument('-funcnum',type=str, default="f1", help="Benchmark function") 
         return parser

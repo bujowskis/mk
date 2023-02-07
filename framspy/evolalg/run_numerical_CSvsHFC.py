@@ -25,7 +25,6 @@ def main():
     # pxovs = [0.2, 0.0]  
     # tournament_size = [5, 20]
     mutation_sd_fraction = [.01, .1]  # fixme - mutation sd_fraction
-
     results_directory_path = 'results/numerical_CSvsHFC/'
 
     # seeds = [seed for seed in range(10)]

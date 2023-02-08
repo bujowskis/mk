@@ -82,7 +82,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
                 population=self.populations[pop_idx], dimensions=self.dimensions, evaluate=self.evaluate
             )
             for i in self.populations[pop_idx].population:
-                i.contributor_spops = [0.0 for _ in range(self.number_of_epochs)]
+                i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]
 
         df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops'])
 
@@ -92,13 +92,17 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
 
             if g % self.migration_interval == 0:
                 self.current_epoch += 1
+                for idx, population in enumerate(self.populations):
+                    for individual in population.population:
+                        individual.prev_spop_idx = idx
                 # todo - contributor_spops here?
                 self.migrate_populations()
                 # todo - contributor_spops here?
                 for population in self.populations:
                     for individual in population.population:
-                        prev_spop_idx = [0.0 for _ in range(self.number_of_epochs)]
-                        prev_spop_idx[self.current_epoch-1] = 1.0
+                        prev_spop_idx = [0.0 for _ in range(self.number_of_populations)]
+                        # prev_spop_idx[self.current_epoch-1] = 1.0
+                        prev_spop_idx[individual.prev_spop_idx] = 1.0
                         individual.contributor_spops = list(
                             ((self.current_epoch-1) * np.array(individual.contributor_spops) + np.array(prev_spop_idx)) / self.current_epoch
                         )
@@ -109,7 +113,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops]
-            self.update_stats(g, pool_of_all_individuals)
+            # self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0

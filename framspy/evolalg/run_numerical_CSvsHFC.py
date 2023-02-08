@@ -13,7 +13,8 @@ def main():
     NUMBER_OF_REPETITIONS = 30
     hof_size = 10
     evaluations = 100_000
-    functions = [f21, f22, f23, f24, f25, f26, f27, f28, f29, f30, f1, f3, f4, f5, f6, f7, f8, f9, f10]
+    # f21, f22, f23, f24, f25, f26, f27, f28
+    functions = [f30, f1, f3, f4, f5, f6, f7, f8, f9, f10]  # FIXME - f29 [nan, nan)
     dimension = 30
     parameters_default = {"migration_interval": 10, "populations": 25, "subpopsize": 50, "pmut": 0.8, "pxov": 0.2, "tournament_size": 5}
     parameters_optional = {"migration_interval": 2, "populations": 5, "subpopsize": 100, "pmut": 1.0, "pxov": 0.0, "tournament_size": 20}

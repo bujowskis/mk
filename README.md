@@ -5,9 +5,7 @@
 
 - __3rd Feb__ - submit abstract (but better have working code already, so that the rest of the time goes to computation and paper)
 
-- `if all good:` __10th Feb__ - submit final paper
-    
-- `else:` __17th Feb__ - submit final paper (however, no chance to present the work on conference then - only as poster)
+- __10th Feb__ - submit final paper
 
 ## NOTES TO SELF
 - when using PyCharm, opening `framspy`

@@ -46,8 +46,9 @@ class ExperimentNumericalHFC(ExperimentHFC):
             for i in self.populations[pop_idx].population:
                 i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
                 i.innovation_in_time[self.current_epoch] = 1.0
+                i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'innovation_in_time'])
+        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time'])
 
         # CALIBRATION STAGE
         pool_of_all_individuals = []
@@ -72,14 +73,27 @@ class ExperimentNumericalHFC(ExperimentHFC):
 
             if g % self.migration_interval == 0:
                 self.current_epoch += 1
+                for idx, population in enumerate(self.populations):
+                    for individual in population.population:
+                        individual.prev_spop = idx
+
                 self.migrate_populations()
+
+                for population in self.populations:
+                    for individual in population.population:
+                        prev_spop_idx = [0.0 for _ in range(self.number_of_populations+1)]
+                        # prev_spop_idx[self.current_epoch-1] = 1.0
+                        prev_spop_idx[individual.prev_spop] = 1.0
+                        individual.contributor_spops = list(
+                            ((self.current_epoch-1) * np.array(individual.contributor_spops) + np.array(prev_spop_idx)) / self.current_epoch
+                        )
 
             pool_of_all_individuals = []
             [pool_of_all_individuals.extend(p.population) for p in self.populations]
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].innovation_in_time]
-            self.update_stats(g, pool_of_all_individuals)
+            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].innovation_in_time]
+            # self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
@@ -103,6 +117,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             new_individual.set_and_evaluate(self.mutate(ind.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
                 new_individual.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
+                new_individual.contributor_spops = copy.deepcopy(ind.contributor_spops)
                 newpop.append(new_individual)
 
         # adding valid crossovers of selected individuals...
@@ -112,7 +127,9 @@ class ExperimentNumericalHFC(ExperimentHFC):
             new_individual = Individual()
             new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
+                print([ind1.innovation_in_time, ind2.innovation_in_time])
                 new_individual.innovation_in_time = list(np.average([ind1.innovation_in_time, ind2.innovation_in_time], axis=0))
+                new_individual.contributor_spops = list(np.average([ind1.contributor_spops, ind2.contributor_spops], axis=0))
                 newpop.append(new_individual)
 
         # FIXME - no way to introduce random individuals in make_new_population
@@ -121,6 +138,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
             ind_copy = Individual().copyFrom(ind)
             ind_copy.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
+            ind_copy.contributor_spops = copy.deepcopy(ind.contributor_spops)
             newpop.append(ind_copy)
 
         return newpop
@@ -135,6 +153,9 @@ class ExperimentNumericalHFC(ExperimentHFC):
             if not hasattr(i, 'innovation_in_time'):
                 i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
                 i.innovation_in_time[self.current_epoch] = 1.0
+                i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
+                i.contributor_spops[-1] = 1.0
+                i.prev_spop = 0
 
     def save_genotypes(self, filename):
         state_to_save = {
@@ -142,6 +163,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             "hof": [{
                 "genotype": individual.genotype,
                 "fitness": individual.rawfitness,
+                "contributor_spops": individual.contributor_spops,
                 "innovation_in_time": individual.innovation_in_time
             } for individual in self.hof.hof],
         }

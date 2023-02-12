@@ -1,12 +1,6 @@
 # Convection Selection Młoda Kadra Project
 - Framsticks50rc23
 
-## GECCO Deadlines:
-
-- __3rd Feb__ - submit abstract (but better have working code already, so that the rest of the time goes to computation and paper)
-
-- __10th Feb__ - submit final paper
-
 ## NOTES TO SELF
 - when using PyCharm, opening `framspy`
 

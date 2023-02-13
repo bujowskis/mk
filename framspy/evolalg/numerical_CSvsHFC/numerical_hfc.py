@@ -94,7 +94,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].innovation_in_time]
-            self.update_stats(g, pool_of_all_individuals)
+            # self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0

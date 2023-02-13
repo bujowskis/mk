@@ -19,12 +19,13 @@ from evolalg.constants import BAD_FITNESS
 class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
     def __init__(
             self, popsize, hof_size, number_of_populations, migration_interval, save_only_best,
-            benchmark_function, results_directory_path, dimensions
+            benchmark_function, results_directory_path, dimensions, mutsize
     ):
         super().__init__(popsize, hof_size, number_of_populations, migration_interval, save_only_best)
         self.benchmark_function = benchmark_function
         self.results_directory_path = results_directory_path
         self.dimensions = dimensions
+        self.mutsize = mutsize
         self.number_of_epochs: int = None
         self.current_epoch: int = None
 
@@ -142,4 +143,4 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
         return evaluate_cec2017(genotype, self.benchmark_function)
 
     def mutate(self, gen1):
-        return cec2017_numerical_mutation(gen1)
+        return cec2017_numerical_mutation(gen1, self.mutsize)

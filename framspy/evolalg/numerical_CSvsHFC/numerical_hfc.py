@@ -19,12 +19,13 @@ from evolalg.constants import BAD_FITNESS
 class ExperimentNumericalHFC(ExperimentHFC):
     def __init__(
             self, popsize, hof_size, number_of_populations, migration_interval, save_only_best,
-            benchmark_function, dimensions: int, results_directory_path: str
+            benchmark_function, dimensions: int, results_directory_path: str, mutsize
     ):
         super().__init__(popsize, hof_size, number_of_populations, migration_interval, save_only_best)
         self.benchmark_function = benchmark_function
         self.dimensions = dimensions
         self.results_directory_path = results_directory_path
+        self.mutsize = mutsize
         self.number_of_epochs: int = None
         self.current_epoch: int = None
 
@@ -93,7 +94,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].innovation_in_time]
-            # self.update_stats(g, pool_of_all_individuals)
+            self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0
@@ -127,7 +128,6 @@ class ExperimentNumericalHFC(ExperimentHFC):
             new_individual = Individual()
             new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
-                print([ind1.innovation_in_time, ind2.innovation_in_time])
                 new_individual.innovation_in_time = list(np.average([ind1.innovation_in_time, ind2.innovation_in_time], axis=0))
                 new_individual.contributor_spops = list(np.average([ind1.contributor_spops, ind2.contributor_spops], axis=0))
                 newpop.append(new_individual)

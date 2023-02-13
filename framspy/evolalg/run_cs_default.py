@@ -28,7 +28,7 @@ def main():
         dimensions=dimension, mutsize=fraction
     )
     hof, stats, df = experiment.evolve(
-        hof_savefile=f'/home/frams/obliczenia/fitdiversity/framspy/HoF/numerical_CSvsHFC/cs-ew/HoF-cs-{function_str}-{dimension}-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
+        hof_savefile=f'HoF/numerical_CSvsHFC/cs-ew/HoF-cs-{function_str}-{dimension}-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
         generations=generations,
         tournament_size=tournament_size,
         pmut=pmut,
@@ -36,7 +36,7 @@ def main():
         try_from_saved_file=False,
         initialgenotype=np.zeros(dimension)
     )
-    df.to_csv(f'/home/frams/obliczenia/fitdiversity/framspy/results/numerical_CSvsHFC/cs/numerical_CSvsHFC-cs-{function_str}-{dimension}-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
+    df.to_csv(f'results/numerical_CSvsHFC/cs/numerical_CSvsHFC-cs-{function_str}-{dimension}-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
     
 
 if __name__ == "__main__":

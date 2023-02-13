@@ -174,7 +174,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
         return evaluate_cec2017(genotype, self.benchmark_function)
 
     def mutate(self, gen1):
-        return cec2017_numerical_mutation(gen1)
+        return cec2017_numerical_mutation(gen1, self.mutsize)
 
     def cross_over(self, gen1, gen2):
         return cec2017_numerical_crossover(gen1, gen2)

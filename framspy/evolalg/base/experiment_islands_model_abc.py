@@ -96,4 +96,5 @@ class ExperimentIslands(ExperimentABC, ABC):
         parser.add_argument('-runnum',type=int, default=0, help="Current run number")  
         parser.add_argument('-dims',type=int, default=2, help="Dimensionality of a benchmark function")  
         parser.add_argument('-funcnum',type=str, default="f1", help="Benchmark function") 
+        parser.add_argument('-tsize', type=int, default=5, help="Tournament size") 
         return parser

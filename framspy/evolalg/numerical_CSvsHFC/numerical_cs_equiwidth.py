@@ -43,6 +43,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             new_individual.set_and_evaluate(self.mutate(ind.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
                 new_individual.contributor_spops = copy.deepcopy(ind.contributor_spops)
+                new_individual.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
                 newpop.append(new_individual)
 
         # adding valid crossovers of selected individuals...
@@ -53,6 +54,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
                 new_individual.contributor_spops = list(np.average([ind1.contributor_spops, ind2.contributor_spops], axis=0))
+                new_individual.avg_migration_jump = list(np.average([ind1.avg_migration_jump, ind2.avg_migration_jump], axis=0))
                 newpop.append(new_individual)
 
         # FIXME - no way to introduce random individuals in make_new_population
@@ -61,6 +63,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
             ind_copy = Individual().copyFrom(ind)
             ind_copy.contributor_spops = copy.deepcopy(ind.contributor_spops)
+            ind_copy.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
             newpop.append(ind_copy)
 
         return newpop
@@ -84,8 +87,9 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             )
             for i in self.populations[pop_idx].population:
                 i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]
+                i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops'])
+        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
 
         for g in range(self.current_generation, generations):
             for p in self.populations:
@@ -95,17 +99,23 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
                 self.current_epoch += 1
                 for idx, population in enumerate(self.populations):
                     for individual in population.population:
-                        individual.prev_spop_idx = idx
+                        individual.prev_spop = idx
                 # todo - contributor_spops here?
                 self.migrate_populations()
                 # todo - contributor_spops here?
-                for population in self.populations:
+                for cur_spop, population in enumerate(self.populations):
                     for individual in population.population:
                         prev_spop_idx = [0.0 for _ in range(self.number_of_populations)]
                         # prev_spop_idx[self.current_epoch-1] = 1.0
-                        prev_spop_idx[individual.prev_spop_idx] = 1.0
+                        prev_spop_idx[individual.prev_spop] = 1.0
                         individual.contributor_spops = list(
                             ((self.current_epoch-1) * np.array(individual.contributor_spops) + np.array(prev_spop_idx)) / self.current_epoch
+                        )
+                        # individual.avg_migration_jump = individual.avg_migration_jump + abs(individual.prev_spop - cur_spop)
+                        avg_mig = [0.0 for _ in range(self.number_of_populations*2 + 1)]
+                        avg_mig[abs(individual.prev_spop - cur_spop)] = 1.0
+                        individual.avg_migration_jump = list(
+                            ((self.current_epoch-1) * np.array(individual.avg_migration_jump) + np.array(avg_mig)) / self.current_epoch
                         )
 
             pool_of_all_individuals = []
@@ -113,7 +123,7 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
                 pool_of_all_individuals.extend(p.population)
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops]
+            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].avg_migration_jump]
             # self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g
@@ -130,7 +140,8 @@ class ExperimentNumericalCSEquiwidth(ExperimentConvectionSelectionEquiwidth):
             "hof": [{
                 "genotype": individual.genotype,
                 "fitness": individual.rawfitness,
-                "contributor_spops": individual.contributor_spops
+                "contributor_spops": individual.contributor_spops,
+                "avg_migration_jump": individual.avg_migration_jump
             } for individual in self.hof.hof],
         }
         with open(f"{filename}.json", 'w') as f:

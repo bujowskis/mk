@@ -48,8 +48,10 @@ class ExperimentNumericalHFC(ExperimentHFC):
                 i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
                 i.innovation_in_time[self.current_epoch] = 1.0
                 i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
+                # FIXME - same approach as in contributor_spops?
+                i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time'])
+        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
 
         # CALIBRATION STAGE
         pool_of_all_individuals = []
@@ -80,7 +82,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
 
                 self.migrate_populations()
 
-                for population in self.populations:
+                for cur_spop, population in enumerate(self.populations):
                     for individual in population.population:
                         prev_spop_idx = [0.0 for _ in range(self.number_of_populations+1)]
                         # prev_spop_idx[self.current_epoch-1] = 1.0
@@ -88,12 +90,19 @@ class ExperimentNumericalHFC(ExperimentHFC):
                         individual.contributor_spops = list(
                             ((self.current_epoch-1) * np.array(individual.contributor_spops) + np.array(prev_spop_idx)) / self.current_epoch
                         )
+                        # individual.avg_migration_jump = individual.avg_migration_jump + abs(individual.prev_spop - cur_spop)
+                        # FIXME - same approach as in contributor_spops?
+                        avg_mig = [0.0 for _ in range(self.number_of_populations*2 + 1)]
+                        avg_mig[abs(individual.prev_spop - cur_spop)] = 1.0
+                        individual.avg_migration_jump = list(
+                            ((self.current_epoch-1) * np.array(individual.avg_migration_jump) + np.array(avg_mig)) / self.current_epoch
+                        )
 
             pool_of_all_individuals = []
             [pool_of_all_individuals.extend(p.population) for p in self.populations]
             self.update_stats(g, pool_of_all_individuals)
             cli_stats = self.get_cli_stats()
-            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].innovation_in_time]
+            df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].innovation_in_time, pool_of_all_individuals[cli_stats[-1]].avg_migration_jump]
             # self.update_stats(g, pool_of_all_individuals)
             if hof_savefile is not None:
                 self.current_generation = g
@@ -119,6 +128,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             if new_individual.fitness is not BAD_FITNESS:
                 new_individual.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
                 new_individual.contributor_spops = copy.deepcopy(ind.contributor_spops)
+                new_individual.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
                 newpop.append(new_individual)
 
         # adding valid crossovers of selected individuals...
@@ -130,6 +140,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             if new_individual.fitness is not BAD_FITNESS:
                 new_individual.innovation_in_time = list(np.average([ind1.innovation_in_time, ind2.innovation_in_time], axis=0))
                 new_individual.contributor_spops = list(np.average([ind1.contributor_spops, ind2.contributor_spops], axis=0))
+                new_individual.avg_migration_jump = list(np.average([ind1.avg_migration_jump, ind2.avg_migration_jump], axis=0))
                 newpop.append(new_individual)
 
         # FIXME - no way to introduce random individuals in make_new_population
@@ -139,6 +150,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
             ind_copy = Individual().copyFrom(ind)
             ind_copy.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
             ind_copy.contributor_spops = copy.deepcopy(ind.contributor_spops)
+            ind_copy.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
             newpop.append(ind_copy)
 
         return newpop
@@ -157,6 +169,10 @@ class ExperimentNumericalHFC(ExperimentHFC):
                 i.contributor_spops[-1] = 1.0
                 i.prev_spop = 0
 
+                # FIXME - same approach as in contributor_spops?
+                i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
+                i.avg_migration_jump[0] = 1.0
+
     def save_genotypes(self, filename):
         state_to_save = {
             "number_of_generations": self.current_generation,
@@ -164,7 +180,8 @@ class ExperimentNumericalHFC(ExperimentHFC):
                 "genotype": individual.genotype,
                 "fitness": individual.rawfitness,
                 "contributor_spops": individual.contributor_spops,
-                "innovation_in_time": individual.innovation_in_time
+                "innovation_in_time": individual.innovation_in_time,
+                "avg_migration_jump": individual.avg_migration_jump
             } for individual in self.hof.hof],
         }
         with open(f"{filename}.json", 'w') as f:

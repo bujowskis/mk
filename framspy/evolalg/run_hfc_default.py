@@ -20,7 +20,7 @@ def main():
     results_directory_path = 'results/numerical_CSvsHFC/'
 
     migration_interval, number_of_populations, subpopsize, pmut, pxov = parameters_default.values()
-    generations = 500
+    generations = 20
 
     experiment = ExperimentNumericalHFC(
         subpopsize, hof_size, number_of_populations, migration_interval,

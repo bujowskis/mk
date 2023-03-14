@@ -54,3 +54,7 @@ def reinitialize_population_with_random_numerical(
 
     assert len(population.population) >= population.population_size
     return population
+
+def get_random_frams_solution(population: PopulationStructures, evaluate) -> PopulationStructures:
+    # TODO 
+    return population

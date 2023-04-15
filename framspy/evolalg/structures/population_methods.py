@@ -58,3 +58,7 @@ def reinitialize_population_with_random_numerical(
 def get_random_frams_solution(population: PopulationStructures, evaluate) -> PopulationStructures:
     # TODO 
     return population
+
+
+def reinitialize_population_with_random_frams(population: PopulationStructures, evaluate) -> PopulationStructures:
+    pass

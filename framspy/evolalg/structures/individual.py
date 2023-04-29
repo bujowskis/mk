@@ -40,4 +40,6 @@ class Individual:
             return "%g\t'%s'" % (self.rawfitness, self.genotype)
 
     def __gt__(self, other):
+        if self.fitness is BAD_FITNESS: return False
+        if other.fitness is BAD_FITNESS: return True
         return self.rawfitness > other.rawfitness

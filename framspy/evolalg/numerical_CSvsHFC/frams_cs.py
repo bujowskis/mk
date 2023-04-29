@@ -12,10 +12,13 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
                  popsize, constraints, genformat,
                  number_of_populations, migration_interval, save_only_best,
                  results_directory_path) -> None:
-        ExperimentConvectionSelectionEquiwidth.__init__(self, popsize, hof_size, number_of_populations, migration_interval, save_only_best)
         ExperimentFrams.__init__(self, frams_lib=frams_lib, optimization_criteria=optimization_criteria,
-                                 hof_size=hof_size, popsize=popsize,
-                                 genformat=genformat, save_only_best=save_only_best, constraints=constraints)
+                                hof_size=hof_size, popsize=popsize,
+                                genformat=genformat, save_only_best=save_only_best, constraints=constraints)
+        ExperimentConvectionSelectionEquiwidth.__init__(self, popsize=popsize, hof_size=hof_size, 
+                                                number_of_populations=number_of_populations, 
+                                                migration_interval=migration_interval, 
+                                                save_only_best=save_only_best)
         self.number_of_epochs: int = None
         self.current_epoch: int = None
         self.results_directory_path = results_directory_path
@@ -35,9 +38,9 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
 
         for pop_idx in range(len(self.populations)):
             self.populations[pop_idx] = reinitialize_population_with_random_frams(
-                framslib=self.frams_lib, genformat=self.genformat, 
-                population=self.populations[pop_idx], evaluate=ExperimentFrams.evaluate,
-                initial_genotype=initialgenotype
+                self, framslib=self.frams_lib, genformat=self.genformat, 
+                population=self.populations[pop_idx], evaluate=self.evaluate,
+                constraints=self.constraints, initial_genotype=initialgenotype
                 )
             for i in self.populations[pop_idx].population:
                 i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]

@@ -32,9 +32,9 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
             for pop_idx in range(len(self.populations)):
                 ## TODO 
                 self.populations[pop_idx] = reinitialize_population_with_random_frams(
-                    framslib=self.frams_lib, genformat=self.genformat, 
-                    population=self.populations[pop_idx], evaluate=ExperimentFrams.evaluate,
-                    initial_genotype=initialgenotype
+                    self, framslib=self.frams_lib, genformat=self.genformat, 
+                    population=self.populations[pop_idx], evaluate=self.evaluate,
+                    constraints=self.constraints, initial_genotype=initialgenotype
                 )
                 for i in self.populations[pop_idx].population:
                     i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
@@ -108,7 +108,7 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
     def add_to_worst(self, initial_genotype=None):
         self.populations[0] = fill_population_with_random_frams(
                 framslib=self.frams_lib, genformat=self.genformat, 
-                population=self.populations[0], evaluate=ExperimentFrams.evaluate,
+                population=self.populations[0], evaluate=self.evaluate,
                 initial_genotype=initial_genotype
             )
         for i in self.populations[0].population:

@@ -24,7 +24,7 @@ class FramsticksLib:
 
 	GENOTYPE_INVALID = "/*invalid*/"  # this is how genotype invalidity is represented in Framsticks
 	EVALUATION_SETTINGS_FILE = [  # all files MUST be compatible with the standard-eval expdef. The order they are loaded in is important!
-		"eval-allcriteria.sim",  # a good trade-off in performance sampling period ("perfperiod") for vertpos and velocity
+		"eval-allcriteria-mini.sim" #,  a good trade-off in performance sampling period ("perfperiod") for vertpos and velocity
 		# "deterministic.sim",  # turns off random noise (added for robustness) so that each evaluation yields identical performance values (causes "overfitting")
 		# "sample-period-2.sim", # short performance sampling period so performance (e.g. vertical position) is sampled more often
 		# "sample-period-longest.sim",  # increased performance sampling period so distance and velocity are measured rectilinearly
@@ -60,6 +60,8 @@ class FramsticksLib:
 			frams.Math.randomize()
 		frams.Simulator.expdef = "standard-eval"  # this expdef (or fully compatible) must be used by EVALUATION_SETTINGS_FILE
 		if sim_settings_files is not None:
+			if not isinstance(sim_settings_files, str):
+				sim_settings_files = sim_settings_files[0]
 			self.EVALUATION_SETTINGS_FILE = sim_settings_files.split(";")  # override defaults. str becomes list
 		print('Basic tests OK. Using settings:', self.EVALUATION_SETTINGS_FILE)
 		print()

@@ -1,4 +1,6 @@
 import random
+import copy
+from evolalg.constants import BAD_FITNESS
 from typing import List
 
 from evolalg.structures.population import PopulationStructures
@@ -58,32 +60,54 @@ def reinitialize_population_with_random_numerical(
     return population
 
 
-def fill_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, initial_genotype=None) -> PopulationStructures:
+def fill_population_with_random_frams(experiment_frams: ExperimentFrams, framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, constraints, initial_genotype=None) -> PopulationStructures:
+    def get_random_valid_frams(genotype, evaluate):
+        individual = Individual()
+        individual.set_and_evaluate(
+            genotype=genotype,
+            evaluate=evaluate
+        )
+        if individual.fitness is BAD_FITNESS:
+            new_genotype = framslib.getRandomGenotype(initial_genotype=initial_genotype, 
+                        parts_min=parts_min, parts_max=parts_max, neurons_min=neurons_min,
+                        neurons_max=neurons_max, iter_max=iter_max, return_even_if_failed=True)
+            return get_random_valid_frams(new_genotype, evaluate)
+        
+        return individual
+
+    
     """
     Fills the population with random Framsticks individuals
     """
-    initial_genotype = ExperimentFrams.frams_getsimplest(genetic_format=genformat, initial_genotype=initial_genotype)
+    initial_genotype = experiment_frams.frams_getsimplest(genetic_format=genformat, initial_genotype=initial_genotype)
     difference_from_target_size = len(population.population) - population.population_size
+    parts_min = 2
+    parts_max = constraints['max_numparts']
+    neurons_min = 1
+    neurons_max = constraints['max_numneurons']
+    iter_max = 10
     if difference_from_target_size < 0:
-        individuals = [framslib.getRandomGenotype(initial_genotype=initial_genotype, return_even_if_failed=True) \
-                       for _ in range(-difference_from_target_size)]
-        for individual in individuals:
-            individual.set_and_evaluate(
-                genotype=individual,
-                evaluate=evaluate
-            )
+        genotypes = [framslib.getRandomGenotype(initial_genotype=initial_genotype, 
+                        parts_min=parts_min, parts_max=parts_max, neurons_min=neurons_min,
+                        neurons_max=neurons_max, iter_max=iter_max, return_even_if_failed=True) \
+                        for _ in range(-difference_from_target_size)]
+        individuals = list()
+        for genotype in genotypes:
+           individual = get_random_valid_frams(genotype, evaluate)
+           individuals.append(individual)
+           
         population.population.extend(individuals)
 
     assert len(population.population) >= population.population_size
     return population
 
 
-def reinitialize_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, initial_genotype=None) -> PopulationStructures:
+def reinitialize_population_with_random_frams(experiment_frams: ExperimentFrams, framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, constraints, initial_genotype=None) -> PopulationStructures:
     """
     Wipes the current population's individuals and fills it with randomly sampled Framsticks individuals
     """
     population.population = []
-    population = fill_population_with_random_frams(framslib, genformat, population, initial_genotype, evaluate=evaluate)
+    population = fill_population_with_random_frams(experiment_frams, framslib, genformat, population, evaluate, constraints, initial_genotype)
 
     assert len(population.population) >= population.population_size
     return population

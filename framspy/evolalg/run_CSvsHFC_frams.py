@@ -21,7 +21,7 @@ def main():
 
     repetition, fraction, tournament_size, sim_file = parsed_args.runnum, parsed_args.mutsize, parsed_args.tsize, parsed_args.sim
     hof_size = 10
-    generations = 1000
+    generations = 10
 
     parameters_default = {"migration_interval": 10, "populations": 25, "subpopsize": 50, "pmut": 0.8, "pxov": 0.2}
     # parameters_optional = {"migration_interval": 2, "populations": 5, "subpopsize": 100, "pmut": 1.0, "pxov": 0.0, "tournament_size": 20}
@@ -31,9 +31,9 @@ def main():
 
     experiment = ExperimentFramsCSEquiwidth(frams_lib=framsLib,
                                         optimization_criteria=opt_criteria,
+                                        genformat=parsed_args.genformat,
                                         hof_size=hof_size,
                                         constraints=constrains,
-                                        genformat=parsed_args.genformat,
                                         popsize=subpopsize,
                                         migration_interval=migration_interval,
                                         number_of_populations=number_of_populations,

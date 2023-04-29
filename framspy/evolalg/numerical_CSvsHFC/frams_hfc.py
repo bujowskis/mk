@@ -1,10 +1,15 @@
 from pandas import DataFrame
 import time
+import copy
 import numpy as np
 from evolalg.structures.population_methods import fill_population_with_random_frams, reinitialize_population_with_random_frams
 from evolalg.hfc_base.experiment_hfc import ExperimentHFC
 from evolalg.utils import get_state_filename
 from ..frams_base.experiment_frams import ExperimentFrams
+
+from evolalg.base.random_sequence_index import RandomIndexSequence
+from evolalg.structures.individual import Individual
+from evolalg.constants import BAD_FITNESS
 
 
 class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
@@ -30,17 +35,15 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
             time0 = time.process_time()
             
             for pop_idx in range(len(self.populations)):
-                ## TODO 
                 self.populations[pop_idx] = reinitialize_population_with_random_frams(
-                    framslib=self.frams_lib, genformat=self.genformat, 
-                    population=self.populations[pop_idx], evaluate=ExperimentFrams.evaluate,
-                    initial_genotype=initialgenotype
+                    self, framslib=self.frams_lib, genformat=self.genformat, 
+                    population=self.populations[pop_idx], evaluate=self.evaluate,
+                    constraints=self.constraints, initial_genotype=initialgenotype
                 )
                 for i in self.populations[pop_idx].population:
                     i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
                     i.innovation_in_time[self.current_epoch] = 1.0
                     i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
-                    # FIXME - same approach as in contributor_spops?
                     i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
             df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
@@ -83,7 +86,6 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                                 ((self.current_epoch-1) * np.array(individual.contributor_spops) + np.array(prev_spop_idx)) / self.current_epoch
                             )
                             # individual.avg_migration_jump = individual.avg_migration_jump + abs(individual.prev_spop - cur_spop)
-                            # FIXME - same approach as in contributor_spops?
                             avg_mig = [0.0 for _ in range(self.number_of_populations*2 + 1)]
                             avg_mig[abs(individual.prev_spop - cur_spop)] = 1.0
                             individual.avg_migration_jump = list(
@@ -105,11 +107,64 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                 
             return self.hof, self.stats, df
     
+
+    def evaluate(self, genotype):
+        return super().evaluate(genotype)
+    
+
+    def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):  # fixme - rename to evolve_one_step
+        """'individuals' is the input population (a list of individuals).
+        Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
+        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""
+
+        newpop = []
+        expected_mut = int(self.popsize * prob_mut)
+        expected_xov = int(self.popsize * prob_xov)
+        assert expected_mut + expected_xov <= self.popsize, f"If probabilities of mutation ({prob_mut}) and crossover ({prob_xov}) added together exceed 1.0, then the population would grow every generation..."
+        ris = RandomIndexSequence(len(individuals))
+
+        # adding valid mutants of selected individuals...
+        while len(newpop) < expected_mut:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            # self.addGenotypeIfValid(newpop, self.mutate(ind.genotype))
+            new_individual = Individual()
+            new_individual.set_and_evaluate(self.mutate(ind.genotype), self.evaluate)
+            if new_individual.fitness is not BAD_FITNESS:
+                new_individual.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
+                new_individual.contributor_spops = copy.deepcopy(ind.contributor_spops)
+                new_individual.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
+                newpop.append(new_individual)
+
+        # adding valid crossovers of selected individuals...
+        while len(newpop) < expected_mut + expected_xov:
+            ind1 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind2 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            # self.addGenotypeIfValid(newpop, self.cross_over(ind1.genotype, ind2.genotype))
+            new_individual = Individual()
+            new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
+            if new_individual.fitness is not BAD_FITNESS:
+                new_individual.innovation_in_time = list(np.average([ind1.innovation_in_time, ind2.innovation_in_time], axis=0))
+                new_individual.contributor_spops = list(np.average([ind1.contributor_spops, ind2.contributor_spops], axis=0))
+                new_individual.avg_migration_jump = list(np.average([ind1.avg_migration_jump, ind2.avg_migration_jump], axis=0))
+                newpop.append(new_individual)
+
+        # select clones to fill up the new population until we reach the same size as the input population
+        while len(newpop) < self.popsize:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            # newpop.append(Individual().copyFrom(ind))
+            ind_copy = Individual().copyFrom(ind)
+            ind_copy.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
+            ind_copy.contributor_spops = copy.deepcopy(ind.contributor_spops)
+            ind_copy.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
+            newpop.append(ind_copy)
+
+        return newpop
+    
     def add_to_worst(self, initial_genotype=None):
-        self.populations[0] = fill_population_with_random_frams(
+        self.populations[0] = fill_population_with_random_frams(self,
                 framslib=self.frams_lib, genformat=self.genformat, 
-                population=self.populations[0], evaluate=ExperimentFrams.evaluate,
-                initial_genotype=initial_genotype
+                population=self.populations[0], evaluate=self.evaluate,
+                constraints=self.constraints, initial_genotype=initial_genotype
             )
         for i in self.populations[0].population:
             if not hasattr(i, 'innovation_in_time'):
@@ -118,7 +173,5 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                 i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
                 i.contributor_spops[-1] = 1.0
                 i.prev_spop = 0
-
-                # FIXME - same approach as in contributor_spops?
                 i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
                 i.avg_migration_jump[0] = 1.0

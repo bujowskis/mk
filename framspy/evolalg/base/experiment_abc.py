@@ -1,6 +1,8 @@
 import argparse
 import json
 import time
+import copy
+import numpy as np
 from abc import ABC, abstractmethod
 
 from ..base.random_sequence_index import RandomIndexSequence
@@ -29,11 +31,19 @@ class ExperimentABC(ABC):
     def select(self, individuals, tournament_size, random_index_sequence):
         """Tournament selection, returns the index of the best individual from those taking part in the tournament"""
         best_index = None
-        for i in range(tournament_size):
-            rnd_index = random_index_sequence.getNext()
+        for _ in range(tournament_size):
+            # rnd_index = random_index_sequence.getNext()
+            rnd_index = self.get_valid_ris(individuals, random_index_sequence)
             if best_index is None or individuals[rnd_index].fitness > best_index.fitness:
                 best_index = individuals[rnd_index]
         return best_index
+    
+    def get_valid_ris(self, individuals, random_index_sequence):
+        rnd_index = random_index_sequence.getNext()
+        while individuals[rnd_index].fitness is None:
+            rnd_index = random_index_sequence.getNext()
+        return rnd_index
+
 
     def addGenotypeIfValid(self, ind_list, genotype):
         new_individual = Individual()
@@ -108,6 +118,7 @@ class ExperimentABC(ABC):
         self.stats = []  # stores the best individuals, one from each generation
         initial_individual = Individual()
         initial_individual.set_and_evaluate(initialgenotype, self.evaluate)
+
         self.hof.add(initial_individual)
         self.stats.append(initial_individual.rawfitness if self.save_only_best else initial_individual)
         self.population_structures = PopulationStructures(

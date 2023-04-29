@@ -15,7 +15,7 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
     """
     def __init__(self, popsize, hof_size, number_of_populations: int, migration_interval: int, save_only_best) -> None:
         # todo - input validation
-        super().__init__(
+        ExperimentABC.__init__(self,
             popsize=popsize,
             hof_size=hof_size,
             save_only_best=save_only_best

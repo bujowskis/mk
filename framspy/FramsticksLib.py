@@ -177,7 +177,7 @@ class FramsticksLib:
 					square_matrix[i][j] = Levenshtein.distance(genotype_list[i], genotype_list[j])
 		elif method in (-2, -3):
 			if self.dissim_measure_density_distribution is None:
-				from dissimilarity.densityDistribution import DensityDistribution
+				from dissimilarity.density_distribution import DensityDistribution
 				self.dissim_measure_density_distribution = DensityDistribution(frams)
 			self.dissim_measure_density_distribution.frequency = (method == -3)
 			square_matrix = self.dissim_measure_density_distribution.getDissimilarityMatrix(genotype_list)

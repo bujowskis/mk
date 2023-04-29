@@ -1,18 +1,10 @@
 from pandas import DataFrame
 import time
 import numpy as np
-import copy
-import json
-from evolalg.json_encoders import Encoder
-from evolalg.structures.population_methods import remove_excess_individuals_random, get_random_frams_solution
+from evolalg.structures.population_methods import reinitialize_population_with_random_frams
 from evolalg.cs_base.experiment_convection_selection_equiwidth import ExperimentConvectionSelectionEquiwidth
 from evolalg.utils import get_state_filename
-from evolalg.base.random_sequence_index import RandomIndexSequence
-from evolalg.structures.individual import Individual
 from ..frams_base.experiment_frams import ExperimentFrams
-from ..structures.population import PopulationStructures
-from ..base.experiment_islands_model_abc import ExperimentIslands
-from evolalg.constants import BAD_FITNESS
 
 
 class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, ExperimentFrams):
@@ -42,10 +34,11 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
             pool_of_all_individuals.extend(p.population)
 
         for pop_idx in range(len(self.populations)):
-            ## TODO
-            self.populations[pop_idx] = get_random_frams_solution(
-                population=self.populations[pop_idx], evaluate=self.evaluate
-            )
+            self.populations[pop_idx] = reinitialize_population_with_random_frams(
+                framslib=self.frams_lib, genformat=self.genformat, 
+                population=self.populations[pop_idx], evaluate=ExperimentFrams.evaluate,
+                initial_genotype=initialgenotype
+                )
             for i in self.populations[pop_idx].population:
                 i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]
                 i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]

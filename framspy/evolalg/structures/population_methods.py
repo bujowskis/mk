@@ -58,7 +58,7 @@ def reinitialize_population_with_random_numerical(
     return population
 
 
-def fill_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, initial_genotype=None) -> PopulationStructures:
+def fill_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, initial_genotype=None) -> PopulationStructures:
     """
     Fills the population with random Framsticks individuals
     """
@@ -70,7 +70,7 @@ def fill_population_with_random_frams(framslib: FramsticksLib, genformat: any, p
         for individual in individuals:
             individual.set_and_evaluate(
                 genotype=individual,
-                evaluate=ExperimentFrams.evaluate
+                evaluate=evaluate
             )
         population.population.extend(individuals)
 
@@ -78,12 +78,12 @@ def fill_population_with_random_frams(framslib: FramsticksLib, genformat: any, p
     return population
 
 
-def reinitialize_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, initial_genotype=None) -> PopulationStructures:
+def reinitialize_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, initial_genotype=None) -> PopulationStructures:
     """
     Wipes the current population's individuals and fills it with randomly sampled Framsticks individuals
     """
     population.population = []
-    population = fill_population_with_random_frams(framslib, genformat, population, initial_genotype)
+    population = fill_population_with_random_frams(framslib, genformat, population, initial_genotype, evaluate=evaluate)
 
     assert len(population.population) >= population.population_size
     return population

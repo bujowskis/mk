@@ -1,26 +1,18 @@
 from pandas import DataFrame
 import time
 import numpy as np
-import copy
-import json
-from evolalg.json_encoders import Encoder
 from evolalg.structures.population_methods import fill_population_with_random_frams, reinitialize_population_with_random_frams
-from evolalg.cs_base.experiment_convection_selection_equiwidth import ExperimentConvectionSelectionEquiwidth
+from evolalg.hfc_base.experiment_hfc import ExperimentHFC
 from evolalg.utils import get_state_filename
-from evolalg.base.random_sequence_index import RandomIndexSequence
-from evolalg.structures.individual import Individual
 from ..frams_base.experiment_frams import ExperimentFrams
-from ..structures.population import PopulationStructures
-from ..base.experiment_islands_model_abc import ExperimentIslands
-from evolalg.constants import BAD_FITNESS
 
 
-class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, ExperimentFrams):
+class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
     def __init__(self, frams_lib, optimization_criteria, hof_size,
                  popsize, constraints, genformat,
                  number_of_populations, migration_interval, save_only_best,
                  results_directory_path) -> None:
-        ExperimentConvectionSelectionEquiwidth.__init__(self, popsize, hof_size, number_of_populations, migration_interval, save_only_best)
+        ExperimentHFC.__init__(self, popsize, hof_size, number_of_populations, migration_interval, save_only_best)
         ExperimentFrams.__init__(self, frams_lib=frams_lib, optimization_criteria=optimization_criteria,
                                  hof_size=hof_size, popsize=popsize,
                                  genformat=genformat, save_only_best=save_only_best, constraints=constraints)
@@ -40,8 +32,9 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
             for pop_idx in range(len(self.populations)):
                 ## TODO 
                 self.populations[pop_idx] = reinitialize_population_with_random_frams(
-                    population=self.populations[pop_idx],
-                    evaluate=self.evaluate
+                    framslib=self.frams_lib, genformat=self.genformat, 
+                    population=self.populations[pop_idx], evaluate=ExperimentFrams.evaluate,
+                    initial_genotype=initialgenotype
                 )
                 for i in self.populations[pop_idx].population:
                     i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
@@ -112,12 +105,12 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
                 
             return self.hof, self.stats, df
     
-    def add_to_worst(self):
+    def add_to_worst(self, initial_genotype=None):
         self.populations[0] = fill_population_with_random_frams(
-            population=self.populations[0],
-            dimensions=self.dimensions,
-            evaluate=self.evaluate
-        )
+                framslib=self.frams_lib, genformat=self.genformat, 
+                population=self.populations[0], evaluate=ExperimentFrams.evaluate,
+                initial_genotype=initial_genotype
+            )
         for i in self.populations[0].population:
             if not hasattr(i, 'innovation_in_time'):
                 i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]

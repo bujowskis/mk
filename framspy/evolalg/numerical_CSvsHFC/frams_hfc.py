@@ -4,7 +4,7 @@ import numpy as np
 import copy
 import json
 from evolalg.json_encoders import Encoder
-from evolalg.structures.population_methods import remove_excess_individuals_random, reinitialize_population_with_random_frams
+from evolalg.structures.population_methods import fill_population_with_random_frams, reinitialize_population_with_random_frams
 from evolalg.cs_base.experiment_convection_selection_equiwidth import ExperimentConvectionSelectionEquiwidth
 from evolalg.utils import get_state_filename
 from evolalg.base.random_sequence_index import RandomIndexSequence
@@ -111,3 +111,21 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
                 self.save_genotypes(hof_savefile)
                 
             return self.hof, self.stats, df
+    
+    def add_to_worst(self):
+        self.populations[0] = fill_population_with_random_frams(
+            population=self.populations[0],
+            dimensions=self.dimensions,
+            evaluate=self.evaluate
+        )
+        for i in self.populations[0].population:
+            if not hasattr(i, 'innovation_in_time'):
+                i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
+                i.innovation_in_time[self.current_epoch] = 1.0
+                i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
+                i.contributor_spops[-1] = 1.0
+                i.prev_spop = 0
+
+                # FIXME - same approach as in contributor_spops?
+                i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
+                i.avg_migration_jump[0] = 1.0

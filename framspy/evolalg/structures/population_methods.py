@@ -3,6 +3,8 @@ from typing import List
 
 from evolalg.structures.population import PopulationStructures
 from evolalg.structures.individual import Individual
+from FramsticksLib import FramsticksLib
+from evolalg.frams_base.experiment_frams import ExperimentFrams
 
 
 def remove_excess_individuals_random(individuals: List[Individual], population_size: int) -> List[Individual]:
@@ -55,14 +57,33 @@ def reinitialize_population_with_random_numerical(
     assert len(population.population) >= population.population_size
     return population
 
-def get_random_frams_individual() -> Individual:
-    # TODO
-    pass
 
-def get_random_frams_population(population: PopulationStructures, evaluate) -> PopulationStructures:
-    # TODO 
+def fill_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, initial_genotype=None) -> PopulationStructures:
+    """
+    Fills the population with random Framsticks individuals
+    """
+    initial_genotype = ExperimentFrams.frams_getsimplest(genetic_format=genformat, initial_genotype=initial_genotype)
+    difference_from_target_size = len(population.population) - population.population_size
+    if difference_from_target_size < 0:
+        individuals = [framslib.getRandomGenotype(initial_genotype=initial_genotype, return_even_if_failed=True) \
+                       for _ in range(-difference_from_target_size)]
+        for individual in individuals:
+            individual.set_and_evaluate(
+                genotype=individual,
+                evaluate=ExperimentFrams.evaluate
+            )
+        population.population.extend(individuals)
+
+    assert len(population.population) >= population.population_size
     return population
 
 
-def reinitialize_population_with_random_frams(population: PopulationStructures, evaluate) -> PopulationStructures:
-    pass
+def reinitialize_population_with_random_frams(framslib: FramsticksLib, genformat: any, population: PopulationStructures, initial_genotype=None) -> PopulationStructures:
+    """
+    Wipes the current population's individuals and fills it with randomly sampled Framsticks individuals
+    """
+    population.population = []
+    population = fill_population_with_random_frams(framslib, genformat, population, initial_genotype)
+
+    assert len(population.population) >= population.population_size
+    return population

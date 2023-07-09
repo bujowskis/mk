@@ -39,6 +39,9 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                     self, framslib=self.frams_lib, genformat=self.genformat, 
                     population=self.populations[pop_idx], evaluate=self.evaluate,
                     constraints=self.constraints, initial_genotype=initialgenotype
+                    self, framslib=self.frams_lib, genformat=self.genformat, 
+                    population=self.populations[pop_idx], evaluate=self.evaluate,
+                    constraints=self.constraints, initial_genotype=initialgenotype
                 )
                 for i in self.populations[pop_idx].population:
                     i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]

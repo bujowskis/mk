@@ -40,13 +40,13 @@ def main():
                                         save_only_best=parsed_args.save_only_best,
                                         results_directory_path=results_directory_path)
 
-    hof, stats, df = experiment.evolve(hof_savefile=f'HoF/frams/hfc/frams_HoF_hfc-{sim_file}-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
+    hof, stats, df = experiment.evolve(hof_savefile=f'HoF/frams/hfc/frams_HoF_hfc-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
                     generations=generations,
                     initialgenotype=parsed_args.initialgenotype,
                     pmut=pmut,
                     pxov=pxov,
                     tournament_size=tournament_size)
-    df.to_csv(f'results/frams/hfc/frams_CSvsHFC_hfc-{sim_file}-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
+    df.to_csv(f'results/frams/hfc/frams_CSvsHFC_hfc-{repetition}-{fraction}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
     
 if __name__ == "__main__":
     main()

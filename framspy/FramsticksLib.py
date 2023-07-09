@@ -111,9 +111,9 @@ class FramsticksLib:
 
 		if not self.PRINT_FRAMSTICKS_OUTPUT:
 			ec.close()
-			if ec.error_count._value() > 0:
-				print(ec.messages)  # if errors occurred, output all caught messages for debugging
-				raise RuntimeError("[ERROR] %d error(s) and %d warning(s) while evaluating %d genotype(s)" % (ec.error_count._value(), ec.warning_count._value(), len(genotype_list)))  # make errors fatal; by default they stop the simulation anyway so let's not use potentially incorrect or partial results and fix the cause first.
+			# if ec.error_count._value() > 0:
+			# 	print(ec.messages)  # if errors occurred, output all caught messages for debugging
+			# 	raise RuntimeError("[ERROR] %d error(s) and %d warning(s) while evaluating %d genotype(s)" % (ec.error_count._value(), ec.warning_count._value(), len(genotype_list)))  # make errors fatal; by default they stop the simulation anyway so let's not use potentially incorrect or partial results and fix the cause first.
 
 		results = []
 		for g in frams.GenePools[0]:

@@ -61,6 +61,9 @@ def reinitialize_population_with_random_numerical(
 
 
 def fill_population_with_random_frams(experiment_frams: ExperimentFrams, framslib: FramsticksLib, genformat: any, population: PopulationStructures, evaluate, constraints, initial_genotype=None) -> PopulationStructures:
+    """
+    Fills the population with random Framsticks individuals
+    """
     def get_random_valid_frams(genotype, evaluate):
         individual = Individual()
         individual.set_and_evaluate(
@@ -75,10 +78,6 @@ def fill_population_with_random_frams(experiment_frams: ExperimentFrams, framsli
         
         return individual
 
-    
-    """
-    Fills the population with random Framsticks individuals
-    """
     initial_genotype = experiment_frams.frams_getsimplest(genetic_format=genformat, initial_genotype=initial_genotype)
     difference_from_target_size = len(population.population) - population.population_size
     parts_min = 2

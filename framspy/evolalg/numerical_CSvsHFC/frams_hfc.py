@@ -39,9 +39,6 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                     self, framslib=self.frams_lib, genformat=self.genformat, 
                     population=self.populations[pop_idx], evaluate=self.evaluate,
                     constraints=self.constraints, initial_genotype=initialgenotype
-                    self, framslib=self.frams_lib, genformat=self.genformat, 
-                    population=self.populations[pop_idx], evaluate=self.evaluate,
-                    constraints=self.constraints, initial_genotype=initialgenotype
                 )
                 for i in self.populations[pop_idx].population:
                     i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
@@ -129,7 +126,6 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
         # adding valid mutants of selected individuals...
         while len(newpop) < expected_mut:
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
-            # self.addGenotypeIfValid(newpop, self.mutate(ind.genotype))
             new_individual = Individual()
             new_individual.set_and_evaluate(self.mutate(ind.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
@@ -142,7 +138,6 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
         while len(newpop) < expected_mut + expected_xov:
             ind1 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
             ind2 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
-            # self.addGenotypeIfValid(newpop, self.cross_over(ind1.genotype, ind2.genotype))
             new_individual = Individual()
             new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
             if new_individual.fitness is not BAD_FITNESS:
@@ -154,7 +149,6 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
         # select clones to fill up the new population until we reach the same size as the input population
         while len(newpop) < self.popsize:
             ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
-            # newpop.append(Individual().copyFrom(ind))
             ind_copy = Individual().copyFrom(ind)
             ind_copy.innovation_in_time = copy.deepcopy(ind.innovation_in_time)
             ind_copy.contributor_spops = copy.deepcopy(ind.contributor_spops)

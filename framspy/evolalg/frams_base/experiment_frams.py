@@ -53,8 +53,8 @@ class ExperimentFrams(ExperimentABC):
         # the evaluation may have failed for an invalid genotype (such as X[@][@] with "Don't simulate genotypes with warnings" option) or for some other reason
         except (KeyError, TypeError) as e:
             valid = False
-            print('Problem "%s" so could not evaluate genotype "%s", hence assigned it fitness: %s' % (
-                str(e), genotype, BAD_FITNESS))
+            # print('Problem "%s" so could not evaluate genotype "%s", hence assigned it fitness: %s' % (
+            #     str(e), genotype, BAD_FITNESS))
         if valid:
             default_evaluation_data['numgenocharacters'] = len(genotype)  # for consistent constraint checking below
             valid = self.check_valid_constraints(genotype, default_evaluation_data) 

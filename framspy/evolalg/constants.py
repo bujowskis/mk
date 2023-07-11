@@ -1,1 +1,0 @@
-BAD_FITNESS = None

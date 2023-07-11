@@ -1,1 +1,0 @@
-python -m evolalg.run_cs_default -mutsize 0.1 -runnum 1 -funcnum "f1" -dims 30 -tsize 5

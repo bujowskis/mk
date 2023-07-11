@@ -1,0 +1,7 @@
+{
+"runnum": "(1:1)",
+
+"tsize": [10],
+
+"command": "script -q -c 'cd /home/frams/obliczenia/fitdiversity/framspy | python3 -m evolalg.run_CSvsHFC_frams_cs -path /home/frams/obliczenia/fitdiversity/Framsticks50rc28 -opt vertpos -genformat 1 -max_numparts 15 -max_numneurons 20 -max_numjoints 30 -max_numconnections 30  -max_numgenochars 1000 -popsize 20 -generations 50 -runnum %runnum -tsize %tsize'"
+}

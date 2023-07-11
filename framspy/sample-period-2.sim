@@ -1,0 +1,9 @@
+# Very low "performance sampling period" in the first population to sample performance very often during lifespan
+# and avoid overlooking some behavior. Averaged performance of sampled values is returned as the final value.
+# See http://www.framsticks.com/a/al_params.html#exper-perfcalc
+#
+# Before loading this file, load base settings, e.g. "eval-allcriteria.sim".
+# Put this file in the "data" subdirectory within the Framsticks distribution.
+
+Population:
+perfperiod:2

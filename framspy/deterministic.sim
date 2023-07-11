@@ -1,0 +1,21 @@
+# Parameter values that make the evaluation of a Framsticks creature deterministic.
+# The values turn off random noise, so evaluation of the same genotype will always yield the same performance.
+# The advantage is that you do not need to evaluate a genotype many times, and performance values are reliable.
+# The disadvantage is that evolved creatures are "overfitting", i.e. rely entirely on the specific environment,
+# and their behavior may be different in any other environment or (even slightly) changed conditions or parameter values,
+# so each creature evolved using these settings must be later inspected using exactly the same setup.
+#
+# Before loading this file, load base settings, e.g. "eval-allcriteria.sim".
+# Put this file in the "data" subdirectory within the Framsticks distribution.
+
+sim_params:
+# no need to evaluate a creature many times:
+evalcount:1
+# always central location in the world:
+placement:1
+# no random initialization of state in neurons:
+randinit:0.0
+# other noise parameters:
+nnoise:0.0
+bnoise_struct:0.0
+bnoise_vel:0.0

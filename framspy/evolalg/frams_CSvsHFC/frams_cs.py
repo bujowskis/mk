@@ -1,10 +1,15 @@
 from pandas import DataFrame
 import time
+import copy
 import numpy as np
 from evolalg.structures.population_methods import reinitialize_population_with_random_frams
 from evolalg.cs_base.experiment_convection_selection_equiwidth import ExperimentConvectionSelectionEquiwidth
 from evolalg.utils import get_state_filename
 from ..frams_base.experiment_frams import ExperimentFrams
+
+from evolalg.base.random_sequence_index import RandomIndexSequence
+from evolalg.structures.individual import Individual
+from evolalg.constants import BAD_FITNESS
 
 
 class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, ExperimentFrams):
@@ -25,8 +30,9 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
 
     def evolve(
             self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
-            try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
+            genformat, try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
     ):
+        initialgenotype = self.frams_getsimplest(genetic_format=genformat, initial_genotype=initialgenotype)
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
         self.number_of_epochs: int = int(np.floor(generations / self.migration_interval) + 1)  # account for epoch 0 (before start of migration)
         self.current_epoch: int = 0
@@ -88,3 +94,49 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
             self.save_genotypes(hof_savefile)
 
         return self.hof, self.stats, df
+    
+    def evaluate(self, genotype):
+        return super().evaluate(genotype)
+    
+
+    def make_new_population(self, individuals, prob_mut, prob_xov, tournament_size):  # fixme - rename to evolve_one_step
+        """'individuals' is the input population (a list of individuals).
+        Assumptions: all genotypes in 'individuals' are valid and evaluated (have fitness set).
+        Returns: a new population of the same size as 'individuals' with prob_mut mutants, prob_xov offspring, and the remainder of clones."""
+
+        newpop = []
+        expected_mut = int(self.popsize * prob_mut)
+        expected_xov = int(self.popsize * prob_xov)
+        assert expected_mut + expected_xov <= self.popsize, f"If probabilities of mutation ({prob_mut}) and crossover ({prob_xov}) added together exceed 1.0, then the population would grow every generation..."
+        ris = RandomIndexSequence(len(individuals))
+
+        # adding valid mutants of selected individuals...
+        while len(newpop) < expected_mut:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            new_individual = Individual()
+            new_individual.set_and_evaluate(self.mutate(ind.genotype), self.evaluate)
+            if new_individual.fitness is not BAD_FITNESS:
+                new_individual.contributor_spops = copy.deepcopy(ind.contributor_spops)
+                new_individual.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
+                newpop.append(new_individual)
+
+        # adding valid crossovers of selected individuals...
+        while len(newpop) < expected_mut + expected_xov:
+            ind1 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind2 = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            new_individual = Individual()
+            new_individual.set_and_evaluate(self.cross_over(ind1.genotype, ind2.genotype), self.evaluate)
+            if new_individual.fitness is not BAD_FITNESS:
+                new_individual.contributor_spops = list(np.average([ind1.contributor_spops, ind2.contributor_spops], axis=0))
+                new_individual.avg_migration_jump = list(np.average([ind1.avg_migration_jump, ind2.avg_migration_jump], axis=0))
+                newpop.append(new_individual)
+
+        # select clones to fill up the new population until we reach the same size as the input population
+        while len(newpop) < self.popsize:
+            ind = self.select(individuals, tournament_size=tournament_size, random_index_sequence=ris)
+            ind_copy = Individual().copyFrom(ind)
+            ind_copy.contributor_spops = copy.deepcopy(ind.contributor_spops)
+            ind_copy.avg_migration_jump = copy.deepcopy(ind.avg_migration_jump)
+            newpop.append(ind_copy)
+
+        return newpop

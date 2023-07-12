@@ -88,15 +88,16 @@ def fill_population_with_random_frams(experiment_frams: ExperimentFrams, framsli
         return  simplest_individual
 
     initial_genotype = experiment_frams.frams_getsimplest(genetic_format=genformat, initial_genotype=initial_genotype)
-    difference_from_target_size = abs(len(population.population) - population.population_size) # TODO oh really
+    difference_from_target_size = len(population.population) - population.population_size 
     parts_min = 2
     parts_max = constraints['max_numparts'] # TODO what if less than parts_min
+    assert parts_max > parts_min
     neurons_min = 0  # maybe we would want more for velocity-like goals, but when "only-body.sim" is used, we will not have any NN mutations, so any >0 value could not be satisfied
     neurons_max = constraints['max_numneurons']
     iter_max = 10
-    if difference_from_target_size > 0: # TODO oh really
+    if difference_from_target_size < 0:
         individuals = list()
-        for _ in range(difference_from_target_size): # TODO oh really
+        for _ in range(-difference_from_target_size): 
             individual = get_random_valid_frams(evaluate)
             individuals.append(individual)         
 

@@ -22,6 +22,7 @@ def main():
 
     repetition, tournament_size, generations = parsed_args.runnum, parsed_args.tsize, parsed_args.generations
     hof_size = 10
+    genformat = parsed_args.genformat
 
     parameters_default = {"migration_interval": 10, "populations": 25, "subpopsize": 50, "pmut": 0.8, "pxov": 0.2}
     # parameters_optional = {"migration_interval": 2, "populations": 5, "subpopsize": 100, "pmut": 1.0, "pxov": 0.0, "tournament_size": 20}
@@ -31,7 +32,7 @@ def main():
 
     experiment = ExperimentFramsHFC(frams_lib=framsLib,
                                         optimization_criteria=opt_criteria,
-                                        genformat=parsed_args.genformat,
+                                        genformat=genformat,
                                         hof_size=hof_size,
                                         constraints=constrains,
                                         popsize=subpopsize,
@@ -40,14 +41,14 @@ def main():
                                         save_only_best=parsed_args.save_only_best,
                                         results_directory_path=results_directory_path)
 
-    hof, stats, df = experiment.evolve(hof_savefile=f'HoF/frams/hfc/frams_HoF_hfc-{sim_file}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
+    hof, stats, df = experiment.evolve(hof_savefile=f'HoF/frams/hfc/frams_HoF_hfc-{sim_file}-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
                     generations=generations,
                     initialgenotype=parsed_args.initialgenotype,
                     pmut=pmut,
                     pxov=pxov,
-                    genformat=parsed_args.genformat,
+                    genformat=genformat,
                     tournament_size=tournament_size)
-    df.to_csv(f'results/frams/hfc/frams_CSvsHFC_hfc-{sim_file}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
+    df.to_csv(f'results/frams/hfc/frams_CSvsHFC_hfc-{sim_file}-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
     
 if __name__ == "__main__":
     main()

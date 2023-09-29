@@ -24,10 +24,10 @@ class FramsticksLib:
 
 	GENOTYPE_INVALID = "/*invalid*/"  # this is how genotype invalidity is represented in Framsticks
 	EVALUATION_SETTINGS_FILE = [  # all files MUST be compatible with the standard-eval expdef. The order they are loaded in is important!
-		"eval-allcriteria-mini.sim" #,  a good trade-off in performance sampling period ("perfperiod") for vertpos and velocity
-		# "deterministic.sim",  # turns off random noise (added for robustness) so that each evaluation yields identical performance values (causes "overfitting")
-		# "sample-period-2.sim", # short performance sampling period so performance (e.g. vertical position) is sampled more often
-		# "sample-period-longest.sim",  # increased performance sampling period so distance and velocity are measured rectilinearly
+		"eval-allcriteria-mini.sim" , # a good trade-off in performance sampling period ("perfperiod") for vertpos and velocity
+		"deterministic.sim",  # turns off random noise (added for robustness) so that each evaluation yields identical performance values (causes "overfitting")
+		"sample-period-2.sim", # short performance sampling period so performance (e.g. vertical position) is sampled more often
+		"sample-period-longest.sim"  # increased performance sampling period so distance and velocity are measured rectilinearly
 	]
 
 

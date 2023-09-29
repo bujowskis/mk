@@ -48,8 +48,12 @@ def main():
                     pmut=pmut,
                     pxov=pxov,
                     genformat=genformat,
-                    tournament_size=tournament_size)
-    df.to_csv(f'results/frams/cs/frams_CSvsHFC_cs-{sim_file}-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv')
+                    tournament_size=tournament_size,
+                    constrains=constrains, repetition=repetition,
+                    migration_interval=migration_interval,
+                    number_of_populations=number_of_populations,
+                    subpopsize=subpopsize)
+    # df.to_csv(f'results/frams/cs/frams_CSvsHFC_cs-{sim_file}-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv', mode='a', index=False, header=False)
     
 if __name__ == "__main__":
     main()

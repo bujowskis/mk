@@ -30,7 +30,8 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
 
     def evolve(
             self, hof_savefile, generations, initialgenotype, pmut, pxov, tournament_size,
-            genformat, try_from_saved_file: bool = True  # to enable in-code disabling of loading saved savefile
+            genformat,  # to enable in-code disabling of loading saved savefile
+            constrains, repetition, migration_interval, number_of_populations, subpopsize, try_from_saved_file: bool = True
     ):
         initialgenotype = self.frams_getsimplest(genetic_format=genformat, initial_genotype=initialgenotype)
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
@@ -53,7 +54,7 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
                 i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
         df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
-
+        
         for g in range(self.current_generation, generations):
             for p in self.populations:
                 p.population = self.make_new_population(p.population, pmut, pxov, tournament_size)
@@ -86,6 +87,9 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].avg_migration_jump]
             
+            df.to_csv(f'results/frams/cs/frams_CSvsHFC_cs-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv', 
+                      mode='w', index=False, header=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
+
             if hof_savefile is not None:
                 self.current_generation = g
                 self.time_elapsed += time.process_time() - time0

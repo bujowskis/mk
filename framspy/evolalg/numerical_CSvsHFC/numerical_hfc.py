@@ -93,7 +93,11 @@ class ExperimentNumericalHFC(ExperimentHFC):
                         # individual.avg_migration_jump = individual.avg_migration_jump + abs(individual.prev_spop - cur_spop)
                         # FIXME - same approach as in contributor_spops?
                         avg_mig = [0.0 for _ in range(self.number_of_populations*2 + 1)]
-                        avg_mig[individual.prev_spop - cur_spop] = 1.0
+                        
+                        no_change_idx = len(avg_mig) // 2
+                        avg_mig[no_change_idx + cur_spop - individual.prev_spop] = 1.0
+                        
+                        # avg_mig[individual.prev_spop - cur_spop] = 1.0
                         individual.avg_migration_jump = list(
                             ((self.current_epoch-1) * np.array(individual.avg_migration_jump) + np.array(avg_mig)) / self.current_epoch
                         )

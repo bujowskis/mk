@@ -67,9 +67,10 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         # EXAMPLE - Passing parameters for HFC-ADM
         lower_bound, upper_bound = self.get_bounds(
             pool_of_all_individuals, fitnesses_of_individuals,
-            set_worst_to_fixed=False, set_best_to_stdev=False
+            set_worst_to_fixed=True, set_best_to_stdev=False
         )
-        population_width = (upper_bound - lower_bound) / self.number_of_populations - 2
+        lower_bound = self.admission_thresholds[1]
+        population_width = (upper_bound - lower_bound) / (self.number_of_populations - 1)
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i - 1) * population_width
 
@@ -85,8 +86,9 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
             upper_bound = max(fitnesses_of_individuals)
         # Something in between HFC-ADM and Equiwidth approaches
         elif set_worst_to_fixed and not set_best_to_stdev:
-            lower_bound = min(fitnesses_of_individuals)
-            upper_bound = max(fitnesses_of_individuals) - std(fitnesses_of_individuals)
+            avg_random_fitness = sum(fitnesses_of_individuals) / len(pool_of_all_individuals)
+            lower_bound = avg_random_fitness
+            upper_bound = max(fitnesses_of_individuals)
         else:
             raise Exception('not implemented')
 
@@ -110,7 +112,7 @@ class ExperimentHFC(ExperimentConvectionSelection, ABC):
         )
         lower_bound = self.admission_thresholds[1]
         upper_bound = self.admission_thresholds[-1]
-        population_width = (upper_bound - lower_bound) / self.number_of_populations - 2 
+        population_width = (upper_bound - lower_bound) / (self.number_of_populations - 1)
         for i in range(2, self.number_of_populations):
             self.admission_thresholds[i] = lower_bound + (i-1)*population_width
 

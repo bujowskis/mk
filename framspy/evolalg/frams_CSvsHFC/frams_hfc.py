@@ -58,11 +58,11 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
             # EXAMPLE - Passing parameters for HFC-ADM
             self.admission_thresholds[1], self.admission_thresholds[-1] = self.get_bounds(
                 pool_of_all_individuals, fitnesses_of_individuals,
-                set_worst_to_fixed=True, set_best_to_stdev=True
+                set_worst_to_fixed=True, set_best_to_stdev=False
             )
             lower_bound = self.admission_thresholds[1]
             upper_bound = self.admission_thresholds[-1]
-            population_width = (upper_bound - lower_bound) / self.number_of_populations - 2
+            population_width = (upper_bound - lower_bound) / (self.number_of_populations - 1)
             for i in range(2, self.number_of_populations):
                 self.admission_thresholds[i] = lower_bound + (i - 1) * population_width
 

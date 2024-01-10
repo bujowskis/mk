@@ -175,7 +175,7 @@ class ExperimentNumericalHFC(ExperimentHFC):
 
                 # FIXME - same approach as in contributor_spops?
                 i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
-                i.avg_migration_jump[0] = 1.0
+                i.avg_migration_jump[self.number_of_populations] = 1.0
 
     def save_genotypes(self, filename):
         state_to_save = {

@@ -181,4 +181,4 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                 i.contributor_spops[-1] = 1.0
                 i.prev_spop = 0
                 i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
-                i.avg_migration_jump[0] = 1.0
+                i.avg_migration_jump[self.number_of_populations] = 1.0

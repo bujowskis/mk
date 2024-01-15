@@ -1,7 +1,19 @@
 {
-"runnum": "(1:1)",
+"runnum": "(1:5)",
 
-"tsize": [10],
+"path": ["/home/frams/obliczenia/fitdiversity/Framsticks50rc29"],
 
-"command": "script -q -c 'cd /home/frams/obliczenia/fitdiversity/framspy | python3 -m evolalg.run_CSvsHFC_frams_cs -path /home/frams/obliczenia/fitdiversity/Framsticks50rc28 -opt vertpos -genformat 1 -max_numparts 15 -max_numneurons 20 -max_numjoints 30 -max_numconnections 30  -max_numgenochars 1000 -popsize 20 -generations 50 -runnum %runnum -tsize %tsize'"
+"tsize": [2, 5],
+
+"genformat": [9, 1],
+
+"max_numjoints": [5],
+
+"max_numconnections": [5],
+
+"max_numgenochars": [50],
+
+"max_numneurons": [15],
+
+"command": "script -q -c 'pip3 install pandas > 0 | python3 -m evolalg.run_CSvsHFC_frams_cs -path %path -opt vertpos -genformat %genformat -max_numparts 15 -max_numneurons %max_numneurons -max_numjoints %max_numjoints -max_numconnections %max_numconnections -max_numgenochars %max_numgenochars -popsize 20 -generations 300 -runnum %runnum -tsize %tsize'"
 }

@@ -1,1 +1,0 @@
-python -m evolalg.run_preliminary_cs_equinumber

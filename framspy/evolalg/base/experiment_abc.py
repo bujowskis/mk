@@ -142,10 +142,10 @@ class ExperimentABC(ABC):
                 # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
                 print(
                     f"...Resuming from saved state:"
-                    f"population size = {len(self.population_structures.population)},"
+                    f"population size = {len(self.population_structures[0].population)},"
                     f"hof size = {len(self.hof)},"
                     f"stats size = {len(self.stats)},"
-                    f"archive size = {len(self.population_structures.archive)},"
+                    f"archive size = {len(self.population_structures[0].archive)},"
                     f"generation = {self.current_generation}"
                 )
                 return

@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: CEC2017
+Version: 1.0
+Summary: CEC 2017 single objective optimization suite
+Home-page: https://github.com/tilleyd/cec2017-py
+Author: Duncan Tilley

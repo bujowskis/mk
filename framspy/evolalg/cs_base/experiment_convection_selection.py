@@ -6,7 +6,7 @@ from ..structures.individual import Individual
 from ..structures.population import PopulationStructures
 from ..base.experiment_abc import ExperimentABC
 
-from ..utils import get_state_filename
+from ..utils import write_state_to_file, get_evolution_from_state_file, get_state_filename
 
 
 class ExperimentConvectionSelection(ExperimentABC, ABC):
@@ -48,6 +48,38 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         [self.populations.append(
             PopulationStructures(initial_individual=initial_individual, popsize=self.popsize)
         ) for _ in range(self.number_of_populations)]
+
+
+    # TODO - fix
+    def setup_evolution(self, hof_savefile: str, initial_genotype, try_from_saved_file: bool = True):
+        """
+        Called before evolve(), setups the evolution
+
+        :param hof_savefile: filename for Hall of Fame
+        :param initial_genotype: genotype, from which to create the initial pool of individuals
+        :param try_from_saved_file: (optional) whether to try load previously saved evolution or start from new one;
+        setups
+        """
+        if try_from_saved_file:
+            state = get_evolution_from_state_file(hof_savefile)
+            if state is not None:
+                # saved generation has been completed, start with the next one
+                self.load_state(state)
+                self.current_generation += 1
+                # self.current_generation (and g) are 0-based, parsed_args.generations is 1-based
+                print(
+                    f"...Resuming from saved state:"
+                    f"population size = {len(self.populations[0].population)},"
+                    f"hof size = {len(self.hof)},"
+                    f"stats size = {len(self.stats)},"
+                    f"archive size = {len(self.populations[0].archive)},"
+                    f"generation = {self.current_generation}"
+                )
+                return
+        # either do not want from saved file or no save file found
+        self.initialize_evolution(initial_genotype)
+    
+
 
     def get_state(self):
         return [self.time_elapsed, self.current_generation, self.populations, self.hof, self.stats]

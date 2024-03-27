@@ -1,0 +1,1 @@
+python -m evolalg.run_CSvsHFC_frams_cs -path "C:\Users\sofya\Desktop\life\mloda_kadra\Framsticks50rc29" -opt vertpos -genformat 1 -max_numparts 15 -max_numneurons 15 -max_numjoints 5 -max_numconnections 5 -max_numgenochars 50 -popsize 20 -generations 300 -runnum 1 -tsize 2

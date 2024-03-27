@@ -41,7 +41,6 @@ def main():
                                         number_of_populations=number_of_populations,
                                         save_only_best=parsed_args.save_only_best,
                                         results_directory_path=results_directory_path)
-
     hof, stats, df = experiment.evolve(hof_savefile=f'HoF/frams/cs/frams_HoF_cs-{sim_file}-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.gen',
                     generations=generations,
                     initialgenotype=parsed_args.initialgenotype,

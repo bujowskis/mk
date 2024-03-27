@@ -1,0 +1,40 @@
+org:
+genotype:(L(LcX[N,1:1], rqcXLQ(X[G]LXX, ), ), )
+vertpos:1.3130664791490827
+
+org:
+genotype:(LLMQX, cLqqcLqcX[S]RLLqcXQXmX)
+vertpos:1.208759727126386
+
+org:
+genotype:(LLMQX, cLqqcLqcXRLLqcXQXmX)
+vertpos:1.2087597271263855
+
+org:
+genotype:(LLMQX, cLqqcLqcXRLLqcXQX[S]mX)
+vertpos:1.2087597271263817
+
+org:
+genotype:cm(LLMQX, cLqqcLqcX(RLqcXXmX))
+vertpos:1.115158255811013
+
+org:
+genotype:fXrM(,LqLcX(RLLXLX, ), , )
+vertpos:0.9783147065081919
+
+org:
+genotype:fX[|,r:0.915,p:0.25]rM(,LqLcX(RLLXLX, ), , )
+vertpos:0.9783141171080267
+
+org:
+genotype:X[|,r:1,p:0.25]rM(,LqLcX(RLLXLX, ), , )
+vertpos:0.9783140928884024
+
+org:
+genotype:X[|,r:1,p:0.25]r(,LqLcX(RLLXX[@], ), , )
+vertpos:0.9240500715885398
+
+org:
+genotype:X[|,r:1,p:0.25]r(,LqLcX(RLLXX, ), , )
+vertpos:0.9240480868554972
+

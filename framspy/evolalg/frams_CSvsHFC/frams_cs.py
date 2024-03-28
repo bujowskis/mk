@@ -43,15 +43,16 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
         for p in self.populations:
             pool_of_all_individuals.extend(p.population)
 
-        for pop_idx in range(len(self.populations)):
-            self.populations[pop_idx] = reinitialize_population_with_random_frams(
-                self, framslib=self.frams_lib, genformat=self.genformat, 
-                population=self.populations[pop_idx], evaluate=self.evaluate,
-                constraints=self.constraints, initial_genotype=initialgenotype
+        if self.current_generation == 0:  # if not continuing from hof, initialize all params
+            for pop_idx in range(len(self.populations)):
+                self.populations[pop_idx] = reinitialize_population_with_random_frams(
+                    self, framslib=self.frams_lib, genformat=self.genformat,
+                    population=self.populations[pop_idx], evaluate=self.evaluate,
+                    constraints=self.constraints, initial_genotype=initialgenotype
                 )
-            for i in self.populations[pop_idx].population:
-                i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]
-                i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
+                for i in self.populations[pop_idx].population:
+                    i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]
+                    i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
         df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
         

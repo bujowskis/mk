@@ -50,7 +50,6 @@ class ExperimentConvectionSelection(ExperimentABC, ABC):
         ) for _ in range(self.number_of_populations)]
 
 
-    # TODO - fix
     def setup_evolution(self, hof_savefile: str, initial_genotype, try_from_saved_file: bool = True):
         """
         Called before evolve(), setups the evolution

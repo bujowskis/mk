@@ -1,4 +1,5 @@
-from pandas import DataFrame
+import pandas as pd
+import os
 import time
 import copy
 import numpy as np
@@ -54,7 +55,7 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
                     i.contributor_spops = [0.0 for _ in range(self.number_of_populations)]
                     i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
-        df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
+        df = pd.DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
         
         for g in range(self.current_generation, generations):
             for p in self.populations:
@@ -92,8 +93,13 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
             cli_stats = self.get_cli_stats()
             df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].avg_migration_jump]
             
-            df.to_csv(f'results/frams/cs/frams_CSvsHFC_cs-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv', 
-                      mode='w', index=False, header=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'avg_migration_jump'])
+            file_path = f'results/frams/cs/frams_CSvsHFC_cs-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv'
+            file_exists = os.path.exists(file_path)
+            if file_exists:
+                df_existing = pd.read_csv(file_path)
+                df = pd.concat([df_existing, df])
+                df = df.drop_duplicates(subset=['generation'], keep='first')
+            df.to_csv(file_path, mode='w', index=False, header=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
 
             if hof_savefile is not None:
                 self.current_generation = g

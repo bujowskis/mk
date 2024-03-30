@@ -1,4 +1,5 @@
-from pandas import DataFrame
+import pandas as pd
+import os
 import time
 import copy
 import numpy as np
@@ -35,20 +36,21 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
             self.number_of_epochs: int = int(np.floor(generations/self.migration_interval) + 1)  # account for epoch 0 (before start of migration)
             self.current_epoch: int = 0
             time0 = time.process_time()
-            
-            for pop_idx in range(len(self.populations)):
-                self.populations[pop_idx] = reinitialize_population_with_random_frams(
-                    self, framslib=self.frams_lib, genformat=self.genformat, 
-                    population=self.populations[pop_idx], evaluate=self.evaluate,
-                    constraints=self.constraints, initial_genotype=initialgenotype
-                )
-                for i in self.populations[pop_idx].population:
-                    i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
-                    i.innovation_in_time[self.current_epoch] = 1.0
-                    i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
-                    i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
 
-            df = DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
+            if self.current_generation == 0:  # if not continuing from hof, initialize all params
+                for pop_idx in range(len(self.populations)):
+                    self.populations[pop_idx] = reinitialize_population_with_random_frams(
+                        self, framslib=self.frams_lib, genformat=self.genformat, 
+                        population=self.populations[pop_idx], evaluate=self.evaluate,
+                        constraints=self.constraints, initial_genotype=initialgenotype
+                    )
+                    for i in self.populations[pop_idx].population:
+                        i.innovation_in_time = [0.0 for _ in range(self.number_of_epochs)]
+                        i.innovation_in_time[self.current_epoch] = 1.0
+                        i.contributor_spops = [0.0 for _ in range(self.number_of_populations+1)]
+                        i.avg_migration_jump = [0.0 for _ in range(self.number_of_populations*2 + 1)]
+
+            df = pd.DataFrame(columns=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
 
             # CALIBRATION STAGE
             pool_of_all_individuals = []
@@ -105,9 +107,14 @@ class ExperimentFramsHFC(ExperimentHFC, ExperimentFrams):
                 df.loc[len(df)] = [cli_stats[0], cli_stats[1], cli_stats[2], pool_of_all_individuals[cli_stats[-1]].contributor_spops, pool_of_all_individuals[cli_stats[-1]].innovation_in_time, pool_of_all_individuals[cli_stats[-1]].avg_migration_jump]
                 # self.update_stats(g, pool_of_all_individuals)
                 
-                df.to_csv(f'results/frams/hfc/frams_CSvsHFC_hfc-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv',
-                          mode='w', index=False, header=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
-                
+                file_path = f'results/frams/hfc/frams_CSvsHFC_hfc-{genformat}-{constrains["max_numjoints"]}-{constrains["max_numconnections"]}-{constrains["max_numgenochars"]}-{constrains["max_numneurons"]}-{repetition}-{migration_interval}-{number_of_populations}-{subpopsize}-{pmut}-{pxov}-{tournament_size}.csv'
+                file_exists = os.path.exists(file_path)
+                if file_exists:
+                    df_existing = pd.read_csv(file_path)
+                    df = pd.concat([df_existing, df])
+                    df = df.drop_duplicates(subset=['generation'], keep='first')
+                df.to_csv(file_path, mode='w', index=False, header=['generation', 'total_popsize', 'best_fitness', 'contributor_spops', 'innovation_in_time', 'avg_migration_jump'])
+
                 if hof_savefile is not None:
                     self.current_generation = g
                     self.time_elapsed += time.process_time() - time0

@@ -37,7 +37,7 @@ class ExperimentFramsCSEquiwidth(ExperimentConvectionSelectionEquiwidth, Experim
         initialgenotype = self.frams_getsimplest(genetic_format=genformat, initial_genotype=initialgenotype)
         self.setup_evolution(hof_savefile, initialgenotype, try_from_saved_file)
         self.number_of_epochs: int = int(np.floor(generations / self.migration_interval) + 1)  # account for epoch 0 (before start of migration)
-        self.current_epoch: int = 0
+        self.current_epoch: int = int(np.floor(self.current_generation / self.migration_interval))
         time0 = time.process_time()
 
         pool_of_all_individuals = []
